@@ -116,7 +116,7 @@ latest submission wins.
 `show_instance` renders the instance read-only against its template — the full form with the
 entered values in place.
 
-*What do I have open right now?*
+*What forms do I have open right now?*
 
 `list_sessions` reports every session this server has opened — id, mode, page URL, age, and, for
 fill sessions, whether the user has submitted yet:
