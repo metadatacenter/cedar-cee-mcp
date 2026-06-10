@@ -62,6 +62,7 @@ final class CeeTools
   {
     Map<String, Object> properties = new LinkedHashMap<>();
     properties.put("template", templateProperty());
+    properties.put("language", languageProperty());
 
     McpSchema.Tool tool = McpSchema.Tool.builder()
         .name("show_template")
@@ -82,7 +83,8 @@ final class CeeTools
       } catch (RuntimeException e) {
         return error("could not read the template: " + e.getMessage());
       }
-      Session session = sessions.create(Session.Mode.VIEW_TEMPLATE, templateJson, null);
+      Session session = sessions.create(Session.Mode.VIEW_TEMPLATE, templateJson, null,
+          false, languageArg(args));
       return opened(session, "read-only template view");
     });
   }
@@ -98,6 +100,7 @@ final class CeeTools
     properties.put("hide_empty_fields", Map.of("type", "boolean", "description",
         "Omit template fields the instance has no value for, showing only the populated ones. "
             + "Defaults to false: the full template structure shows, with empty fields blank."));
+    properties.put("language", languageProperty());
 
     McpSchema.Tool tool = McpSchema.Tool.builder()
         .name("show_instance")
@@ -122,7 +125,7 @@ final class CeeTools
         return error("could not read the artifacts: " + e.getMessage());
       }
       Session session = sessions.create(Session.Mode.VIEW_INSTANCE, templateJson, instanceJson,
-          boolArg(args, "hide_empty_fields", false));
+          boolArg(args, "hide_empty_fields", false), languageArg(args));
       return opened(session, "read-only instance view");
     });
   }
@@ -142,6 +145,7 @@ final class CeeTools
         "How long to wait for the user to press Done before returning control (default "
             + DEFAULT_FILL_TIMEOUT_SECONDS + ", max " + MAX_FILL_TIMEOUT_SECONDS + "). On timeout "
             + "the session stays open; collect the result later with collect_instance."));
+    properties.put("language", languageProperty());
 
     McpSchema.Tool tool = McpSchema.Tool.builder()
         .name("fill_instance")
@@ -169,7 +173,8 @@ final class CeeTools
         return error("could not read the artifacts: " + e.getMessage());
       }
 
-      Session session = sessions.create(Session.Mode.FILL, templateJson, instanceJson);
+      Session session = sessions.create(Session.Mode.FILL, templateJson, instanceJson,
+          false, languageArg(args));
       String url = web.sessionUrl(session);
       boolean openedInBrowser = browser.open(url);
 
@@ -297,6 +302,19 @@ final class CeeTools
     return Map.of("type", "string", "description",
         "The CEDAR template, as YAML or JSON (auto-detected). YAML is converted to the canonical "
             + "JSON Schema form via cedar-artifact-library; JSON is passed through untouched.");
+  }
+
+  private static Map<String, Object> languageProperty()
+  {
+    return Map.of("type", "string", "description",
+        "UI language for the editor, as an ISO language code (e.g. \"en\", \"de\", \"hu\"). "
+            + "Defaults to English; untranslated strings fall back to English.");
+  }
+
+  private static String languageArg(Map<String, Object> args)
+  {
+    String language = str(args, "language");
+    return (language == null || language.isBlank()) ? "en" : language.trim();
   }
 
   private static McpSchema.JsonSchema schema(Map<String, Object> properties, List<String> required)

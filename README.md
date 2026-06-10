@@ -108,9 +108,9 @@ with `cedar-rest-mcp`.
 
 | Tool | What it does |
 |---|---|
-| `show_template(template)` | Read-only rendering of a template. Returns the page URL. |
-| `show_instance(template, instance, hide_empty_fields?)` | Read-only rendering of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
-| `fill_instance(template, instance?, timeout_seconds?)` | Editable form; **blocks** until the user presses Done (default 120 s), then returns the instance as compact YAML. On timeout the session stays open. |
+| `show_template(template, language?)` | Read-only rendering of a template. Returns the page URL. |
+| `show_instance(template, instance, hide_empty_fields?, language?)` | Read-only rendering of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
+| `fill_instance(template, instance?, timeout_seconds?, language?)` | Editable form; **blocks** until the user presses Done (default 120 s), then returns the instance as compact YAML. On timeout the session stays open. |
 | `collect_instance(session_id)` | Fetches the submitted instance after the fact — the non-blocking half of fill. Latest Done press wins. |
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
@@ -122,6 +122,8 @@ with `cedar-rest-mcp`.
 - **Pre-filling** `fill_instance` with an existing instance requires a *complete* CEDAR JSON
   instance (the CEE's world). A sparse instance from `cedar-artifact-mcp` should be inflated
   first (`instance_to_json` given the template).
+- **`language`** sets the editor's UI language (ISO code, e.g. `"de"`); untranslated strings fall
+  back to English.
 
 ## How it works
 

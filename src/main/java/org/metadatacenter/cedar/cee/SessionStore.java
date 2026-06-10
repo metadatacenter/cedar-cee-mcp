@@ -15,14 +15,14 @@ final class SessionStore
 
   Session create(Session.Mode mode, ObjectNode templateJson, ObjectNode instanceJson)
   {
-    return create(mode, templateJson, instanceJson, false);
+    return create(mode, templateJson, instanceJson, false, "en");
   }
 
   Session create(Session.Mode mode, ObjectNode templateJson, ObjectNode instanceJson,
-      boolean hideEmptyFields)
+      boolean hideEmptyFields, String language)
   {
-    Session session =
-        new Session(UUID.randomUUID().toString(), mode, templateJson, instanceJson, hideEmptyFields);
+    Session session = new Session(UUID.randomUUID().toString(), mode, templateJson, instanceJson,
+        hideEmptyFields, language);
     sessions.put(session.id, session);
     return session;
   }

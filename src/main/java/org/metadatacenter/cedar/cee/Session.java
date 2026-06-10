@@ -32,16 +32,19 @@ final class Session
   final ObjectNode templateJson;
   final ObjectNode instanceJson; // null unless VIEW_INSTANCE, or FILL with a pre-filled instance
   final boolean hideEmptyFields; // VIEW_INSTANCE only: omit unpopulated template fields from the view
+  final String language; // UI language for the editor (ISO code, e.g. "en")
   final Instant createdAt = Instant.now();
   private final CompletableFuture<ObjectNode> submitted = new CompletableFuture<>();
 
-  Session(String id, Mode mode, ObjectNode templateJson, ObjectNode instanceJson, boolean hideEmptyFields)
+  Session(String id, Mode mode, ObjectNode templateJson, ObjectNode instanceJson,
+      boolean hideEmptyFields, String language)
   {
     this.id = id;
     this.mode = mode;
     this.templateJson = templateJson;
     this.instanceJson = instanceJson;
     this.hideEmptyFields = hideEmptyFields;
+    this.language = language;
   }
 
   /** Record the instance the user submitted from the browser. Later submissions win: the user may

@@ -177,6 +177,23 @@ final class CeeMcpTest
     assertTrue(created.get(1).hideEmptyFields);
   }
 
+  @Test void language_parameter_reaches_the_cee_config() throws Exception
+  {
+    call("show_template", Map.of("template", TEMPLATE_YAML, "language", "de"));
+    call("fill_instance", Map.of("template", TEMPLATE_YAML, "timeout_seconds", 1));
+
+    List<Session> created = sessions.all();
+    assertEquals("de", created.get(0).language);
+    assertEquals("en", created.get(1).language, "language defaults to English");
+
+    ObjectNode config = (ObjectNode) JACKSON
+        .readTree(get(web.sessionUrl(created.get(0)) + "/data").body()).get("config");
+    assertEquals("de", config.get("defaultLanguage").asText());
+    assertEquals("en", config.get("fallbackLanguage").asText());
+    assertFalse(config.get("showSampleTemplateLinks").asBoolean(),
+        "sample-template loader is pinned off");
+  }
+
   @Test void show_instance_requires_both_artifacts()
   {
     McpSchema.CallToolResult result = call("show_instance", Map.of("template", TEMPLATE_YAML));

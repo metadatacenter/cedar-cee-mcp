@@ -170,18 +170,28 @@ final class CeeWebServer
   /**
    * The CEE configuration per session. Read-only modes set {@code readOnlyMode}; the fill mode
    * leaves the editor live and points ontology autocomplete at the CEDAR terminology proxy. The
-   * {@code showInstanceData*} / {@code showTemplateSourceData} debug panels stay off everywhere.
-   * {@code hideEmptyFields} (CEE honors it in read-only mode only) follows the session's flag —
-   * a caller display preference on instance views, always off for bare-template views where every
-   * field is empty and hiding would blank the page.
+   * sample-template loader and every developer/debug panel are pinned off — sessions inject their
+   * artifacts directly and the page is for end users. {@code hideEmptyFields} (CEE honors it in
+   * read-only mode only) follows the session's flag — a caller display preference on instance
+   * views, always off for bare-template views where every field is empty and hiding would blank
+   * the page. The UI language follows the session's, falling back to English for untranslated
+   * strings.
    */
   private ObjectNode ceeConfig(Session session)
   {
     ObjectNode config = JACKSON.createObjectNode();
+    config.put("showSampleTemplateLinks", false);
+    config.put("showTemplateRenderingRepresentation", false);
+    config.put("showMultiInstanceInfo", false);
     config.put("showInstanceDataCore", false);
     config.put("showInstanceDataFull", false);
     config.put("showTemplateSourceData", false);
-    config.put("defaultLanguage", "en");
+    config.put("showDataQualityReport", false);
+    config.put("showHeader", false);
+    config.put("showFooter", false);
+    config.put("showPreferencesMenu", false);
+    config.put("defaultLanguage", session.language);
+    config.put("fallbackLanguage", "en");
     config.put("terminologyIntegratedSearchUrl", TERMINOLOGY_URL);
     if (session.mode != Session.Mode.FILL) {
       config.put("readOnlyMode", true);
