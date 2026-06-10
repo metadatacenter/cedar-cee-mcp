@@ -36,7 +36,8 @@ user enters values directly — picking ontology terms from autocomplete rather 
 through chat — with the completed instance flowing back into the conversation for whatever comes
 next.
 
-`cedar-cee-mcp` is one of four MCP servers that together cover a metadata pipeline:
+The `cedar-cee-mcp` is one of four MCP servers that together cover an end-to-end CEDAR-based
+metadata pipeline:
 [`cedar-artifact-mcp`](https://github.com/metadatacenter/cedar-artifact-mcp) **authors** templates
 and instances, [`bioportal-term-mcp`](https://github.com/metadatacenter/bioportal-term-mcp)
 supplies the **ontology terms** they bind to,
