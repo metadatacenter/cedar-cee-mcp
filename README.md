@@ -114,9 +114,9 @@ entered values in place.
 
 | Tool | What it does |
 |---|---|
-| `show_template(template, language?)` | Read-only rendering of a template, so a person can review the metadata standard as the form it will become. Structure, fields, and constraints render exactly as they would for data entry, with inputs disabled. Nothing is collected back; the tool returns the page URL. |
-| `show_instance(template, instance, hide_empty_fields?, language?)` | Read-only rendering of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
-| `fill_instance(template, instance?, timeout_seconds?, language?)` | Editable form. Waits up to `timeout_seconds` (default 120) for the user to press **Done** and returns the populated instance (JSON-LD, exactly as the editor produced it). If the user is still working, the call returns control to the conversation — the form stays open indefinitely, and `collect_instance` retrieves the result whenever the user finishes. Nothing expires. |
+| `show_template(template, language?)` | Presents a read-only rendering of a template, so a person can review the metadata standard as the form it will become. Structure, fields, and constraints render exactly as they would for data entry, with inputs disabled. Nothing is collected back; the tool returns the page URL. |
+| `show_instance(template, instance, hide_empty_fields?, language?)` | Presents a read-only rendering of a populated instance against its template. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
+| `fill_instance(template, instance?, timeout_seconds?, language?)` | Presents an editable form for populating an instance of the template. Waits up to `timeout_seconds` (default 120) for the user to press **Done** and returns the populated instance (JSON-LD, exactly as the editor produced it). If the user is still working, the call returns control to the conversation — the form stays open indefinitely, and `collect_instance` retrieves the result whenever the user finishes. Nothing expires. |
 | `collect_instance(session_id)` | Fetches the submitted instance after the fact — the non-blocking half of fill. Latest Done press wins. |
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
