@@ -14,9 +14,12 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-rest-mcp`):
   content — canonical CEDAR JSON in, JSON-LD out, byte-for-byte, and deliberately **no dependency
   on `cedar-artifact-library`**. YAML ↔ JSON translation belongs to `cedar-artifact-mcp`; if a
   conversion concern appears here, it belongs there.
-- **Tests must pass with no skips**: `mvn test`. They are in-process — no browser, no CDN, no
-  network. Anything that needs a real browser is a manual smoke test (README) — don't try to
-  automate a browser in the unit tier.
+- **Tests must pass with no skips.** Two tiers: `mvn test` runs the in-process unit tests (no
+  browser, no CDN, no network); `mvn verify` adds `EndToEndStdioIT`, which spawns the shaded jar
+  and exercises stdio + HTTP from outside the process (shading, resource packaging, tool
+  registration). The IT must never open a browser — it hands the subprocess a PATH of no-op
+  open/xdg-open shims. Anything that needs a *real* browser (CDN failure, rendering) is a manual
+  smoke test (README) — don't try to automate a browser in either tier.
 - **The CEE is a pinned, prebuilt bundle** (DESIGN.md Principle 3). Don't introduce npm, Node, or
   a frontend build. Upgrading the CEE = bump the version string in
   `src/main/resources/web/session.html` + a manual browser check of both modes.

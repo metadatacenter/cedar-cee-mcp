@@ -5,12 +5,6 @@ several items below are deliberate cuts, not oversights.
 
 ## Next
 
-- **End-to-end stdio IT.** Mirror the siblings: spawn the shaded jar, speak real JSON-RPC over
-  stdio, create a session, fetch the host page and session data over HTTP, POST a submission, and
-  collect it — the regression net for shading, classpath, and tool-registration failures. (The
-  in-browser half stays a manual smoke test; driving a real browser from CI is out of proportion
-  here.)
-
 - **Material icon font.** The CEE's icon ligatures render as text (`more_vert`, `unfold_more`)
   in the host page — the Material Symbols font is not loaded. Add the font link to the host page
   (or confirm which font face the pinned CEE version expects) so the chrome looks right.

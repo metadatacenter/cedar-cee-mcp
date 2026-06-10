@@ -89,6 +89,26 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.2</version>
       </plugin>
+      <!--
+        The end-to-end IT (*IT.java) spawns the shaded jar as a subprocess and exercises it from
+        the outside: real JSON-RPC over stdio plus HTTP against its session web server. It runs in
+        the verify phase, after the shaded jar is built, and catches what in-process tests cannot:
+        shading, resource packaging, stdio framing, and tool registration. No browser is opened —
+        the subprocess gets a PATH containing only no-op open/xdg-open shims.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.5.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Build an executable jar with dependencies bundled for easy MCP-client launch. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

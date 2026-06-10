@@ -187,6 +187,9 @@ editing the config.
 ```bash
 mvn package        # builds target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar (shaded, executable)
 mvn test           # unit tests — in-process, no browser, no CDN
+mvn verify         # + the end-to-end IT: spawns the shaded jar, speaks real JSON-RPC over
+                   #   stdio, and exercises the session web server over HTTP. No browser opens —
+                   #   the subprocess gets a PATH containing only no-op open/xdg-open shims.
 ```
 
 ## Smoke test

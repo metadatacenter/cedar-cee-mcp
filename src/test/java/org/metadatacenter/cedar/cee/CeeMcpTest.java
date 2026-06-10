@@ -143,6 +143,35 @@ final class CeeMcpTest
     assertEquals(409, response.statusCode());
   }
 
+  @Test void malformed_submission_is_a_400_and_does_not_poison_the_session() throws Exception
+  {
+    // A page bug or hand-crafted request must not crash the session or count as a submission.
+    Session session = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
+    String submitUrl = web.sessionUrl(session) + "/submit";
+
+    assertEquals(400, post(submitUrl, "not json {{{").statusCode());
+    assertEquals(400, post(submitUrl, "[1, 2, 3]").statusCode(), "non-object JSON is rejected");
+    assertTrue(session.submittedInstance().isEmpty(), "rejected submissions must not be stored");
+
+    // The session still works after the bad submissions.
+    assertEquals(204, post(submitUrl, INSTANCE_JSON).statusCode());
+    assertTrue(session.submittedInstance().isPresent());
+  }
+
+  @Test void concurrent_fill_sessions_keep_their_submissions_apart() throws Exception
+  {
+    Session first = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
+    Session second = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
+
+    post(web.sessionUrl(first) + "/submit", "{\"Patient Name\": {\"@value\": \"Alice\"}}");
+    post(web.sessionUrl(second) + "/submit", "{\"Patient Name\": {\"@value\": \"Bob\"}}");
+
+    assertEquals("Alice",
+        first.submittedInstance().orElseThrow().get("Patient Name").get("@value").asText());
+    assertEquals("Bob",
+        second.submittedInstance().orElseThrow().get("Patient Name").get("@value").asText());
+  }
+
   // ---------------------------------------------------------------- tools
 
   @Test void show_template_returns_the_session_url()
@@ -233,6 +262,38 @@ final class CeeMcpTest
     McpSchema.CallToolResult after = call("collect_instance", Map.of("session_id", session.id));
     assertFalse(after.isError(), text(after));
     assertTrue(text(after).contains("Alice"), text(after));
+  }
+
+  @Test void fill_prefill_instance_reaches_the_session_data() throws Exception
+  {
+    call("fill_instance",
+        Map.of("template", TEMPLATE_JSON, "instance", INSTANCE_JSON, "timeout_seconds", 1));
+
+    Session session = sessions.all().get(0);
+    ObjectNode data = (ObjectNode) JACKSON.readTree(get(web.sessionUrl(session) + "/data").body());
+    assertEquals("Alice", data.get("instanceObject").get("Patient Name").get("@value").asText(),
+        "the pre-fill instance must reach the page for the editor to render");
+  }
+
+  @Test void timed_out_fill_degrades_into_collect()
+  {
+    // The documented degraded path, end to end: the wait elapses, the user submits later, and
+    // collect_instance still returns the submission.
+    McpSchema.CallToolResult timedOut = call("fill_instance",
+        Map.of("template", TEMPLATE_JSON, "timeout_seconds", 1));
+    String sessionId = sessionIdIn(text(timedOut));
+    assertNotNull(sessionId, text(timedOut));
+
+    try {
+      Session session = sessions.get(sessionId).orElseThrow();
+      assertEquals(204, post(web.sessionUrl(session) + "/submit", INSTANCE_JSON).statusCode());
+    } catch (Exception e) {
+      throw new AssertionError(e);
+    }
+
+    McpSchema.CallToolResult collected = call("collect_instance", Map.of("session_id", sessionId));
+    assertFalse(collected.isError(), text(collected));
+    assertTrue(text(collected).contains("Alice"), text(collected));
   }
 
   @Test void collect_instance_rejects_unknown_sessions()
