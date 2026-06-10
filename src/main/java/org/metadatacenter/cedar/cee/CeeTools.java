@@ -142,9 +142,10 @@ final class CeeTools
             + "render it — inflate a sparse instance first (e.g. cedar-artifact-mcp's "
             + "instance_to_json given the template). Omit to start from an empty form."));
     properties.put("timeout_seconds", Map.of("type", "integer", "description",
-        "How long to wait for the user to press Done before returning control (default "
-            + DEFAULT_FILL_TIMEOUT_SECONDS + ", max " + MAX_FILL_TIMEOUT_SECONDS + "). On timeout "
-            + "the session stays open; collect the result later with collect_instance."));
+        "How long this call waits for the user to press Done before returning control to the "
+            + "conversation (default " + DEFAULT_FILL_TIMEOUT_SECONDS + ", max "
+            + MAX_FILL_TIMEOUT_SECONDS + "). Not a deadline on the user: the form stays open "
+            + "indefinitely; collect the result later with collect_instance."));
     properties.put("language", languageProperty());
 
     McpSchema.Tool tool = McpSchema.Tool.builder()
@@ -152,11 +153,12 @@ final class CeeTools
         .title("Open an editable metadata form and wait for the user to fill it")
         .description("Opens an editable CEDAR metadata form in the user's browser via the CEDAR "
             + "Embeddable Editor — with ontology-backed autocomplete for controlled-term fields — "
-            + "and BLOCKS until the user presses the form's Done button, then returns the "
-            + "populated instance as compact YAML. If the user has not pressed Done before "
-            + "timeout_seconds, the call returns with the session id and the form stays open; "
-            + "call collect_instance with that id once the user says they are done. Tell the user "
-            + "a form has been opened and that they should press Done when finished.")
+            + "and waits up to timeout_seconds for the user to press the form's Done button. If "
+            + "they do, the populated instance comes back immediately as compact YAML. If they "
+            + "are still working, the call returns control with the session id — the form stays "
+            + "open indefinitely and nothing the user typed is lost; call collect_instance with "
+            + "that id once the user says they are done. Tell the user a form has been opened and "
+            + "that they should press Done when finished.")
         .inputSchema(schema(properties, List.of("template")))
         .build();
 
@@ -188,8 +190,9 @@ final class CeeTools
         return text("The form is open at " + url + " (session " + session.id + ") but the user "
             + "has not pressed Done yet"
             + (openedInBrowser ? "" : " — and the browser could not be opened automatically, so "
-                + "share the URL with the user") + ". The session stays open: when the user says "
-            + "they have finished, call collect_instance with session_id " + session.id + ".");
+                + "share the URL with the user") + ". The form stays open indefinitely and "
+            + "nothing is lost: when the user says they have finished, call collect_instance "
+            + "with session_id " + session.id + ".");
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         return error("interrupted while waiting for the form submission");

@@ -92,8 +92,9 @@ children:
     value: 30
 ```
 
-If the user takes longer than the timeout, the call returns with the session id and the form
-stays open; when the user says they're done, the LLM calls `collect_instance` with that id.
+If the user is still filling the form when the wait elapses, the call simply returns control with
+the session id — the form stays open indefinitely and nothing the user typed is lost; when the
+user says they're done, the LLM calls `collect_instance` with that id.
 
 *Show me the populated instance.*
 
@@ -110,7 +111,7 @@ with `cedar-rest-mcp`.
 |---|---|
 | `show_template(template, language?)` | Read-only rendering of a template. Returns the page URL. |
 | `show_instance(template, instance, hide_empty_fields?, language?)` | Read-only rendering of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
-| `fill_instance(template, instance?, timeout_seconds?, language?)` | Editable form; **blocks** until the user presses Done (default 120 s), then returns the instance as compact YAML. On timeout the session stays open. |
+| `fill_instance(template, instance?, timeout_seconds?, language?)` | Editable form. Waits up to `timeout_seconds` (default 120) for the user to press **Done** and returns the populated instance as compact YAML. If the user is still working, the call returns control to the conversation — the form stays open indefinitely, and `collect_instance` retrieves the result whenever the user finishes. Nothing expires. |
 | `collect_instance(session_id)` | Fetches the submitted instance after the fact — the non-blocking half of fill. Latest Done press wins. |
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
