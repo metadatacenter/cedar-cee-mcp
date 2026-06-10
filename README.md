@@ -102,13 +102,29 @@ children:
 ```
 
 If the user is still filling the form when the wait elapses, the call simply returns control with
-the session id — the form stays open indefinitely and nothing the user typed is lost; when the
-user says they're done, the LLM calls `collect_instance` with that id.
+the session id — the form stays open indefinitely and nothing the user typed is lost.
+
+*OK, I've finished the form.*
+
+`collect_instance`, given the session id from `fill_instance`, fetches what the user submitted —
+the non-blocking half of the fill story. If the user has not pressed Done yet, it says so rather
+than failing; if the user pressed Done more than once (say, to fix a mistake they spotted), the
+latest submission wins.
 
 *Show me the populated instance.*
 
 `show_instance` renders the instance read-only against its template — the full form with the
 entered values in place.
+
+*What do I have open right now?*
+
+`list_sessions` reports every session this server has opened — id, mode, page URL, age, and, for
+fill sessions, whether the user has submitted yet:
+
+```
+f3f61a88-0f8a-4ad4-a846-9f9ef493b805  VIEW_TEMPLATE  http://127.0.0.1:52144/s/f3f61a88-0f8a-4ad4-a846-9f9ef493b805  age=212s
+ba242ba9-1c3b-4491-950c-c8d7f4291e04  FILL  http://127.0.0.1:52144/s/ba242ba9-1c3b-4491-950c-c8d7f4291e04  age=64s  submitted=true
+```
 
 ## Tools
 
