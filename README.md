@@ -108,8 +108,8 @@ with `cedar-rest-mcp`.
 
 | Tool | What it does |
 |---|---|
-| `show_template(template)` | Read-only render of a template. Returns the page URL. |
-| `show_instance(template, instance, hide_empty_fields?)` | Read-only render of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
+| `show_template(template)` | Read-only rendering of a template. Returns the page URL. |
+| `show_instance(template, instance, hide_empty_fields?)` | Read-only rendering of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
 | `fill_instance(template, instance?, timeout_seconds?)` | Editable form; **blocks** until the user presses Done (default 120 s), then returns the instance as compact YAML. On timeout the session stays open. |
 | `collect_instance(session_id)` | Fetches the submitted instance after the fact — the non-blocking half of fill. Latest Done press wins. |
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
@@ -184,7 +184,7 @@ You should see the capabilities, six tools, and `pong: hello`. `Ctrl-C` to exit.
 Browser-level (the part unit tests can't cover): call `show_template` from an MCP client with any
 template and confirm the form renders read-only in the opened tab; then `fill_instance`, type a
 value, press **Done**, and confirm the YAML comes back. This end-to-end loop — CDN bundle load,
-read-only render, editable render, typed value landing in `currentMetadata`, Done → submit →
+read-only rendering, editable rendering, typed value landing in `currentMetadata`, Done → submit →
 YAML — has been verified against CEE 1.5.0.
 
 ## License
