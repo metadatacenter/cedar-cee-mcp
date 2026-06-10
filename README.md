@@ -108,11 +108,7 @@ user says they're done, the LLM calls `collect_instance` with that id.
 *Show me the populated instance.*
 
 `show_instance` renders the instance read-only against its template — the full form with the
-entered values in place. (Pass `hide_empty_fields: true` to omit unpopulated fields and see only
-the values the instance holds.)
-
-From here the pipeline continues with the siblings: validate with `cedar-artifact-mcp`, persist
-with `cedar-rest-mcp`.
+entered values in place.
 
 ## Tools
 
