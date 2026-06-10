@@ -10,9 +10,10 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-rest-mcp`):
 
 - **Comments describe code-level facts only.** No PR numbers, session context, or anything that
   needs the authoring context to make sense.
-- **Artifact content is never massaged by hand.** YAML ↔ JSON conversion goes through
-  `cedar-artifact-library` (`ArtifactCodec`), byte-for-byte. If a conversion looks wrong, fix it
-  in the library, not by string-editing here.
+- **This server does not interpret artifacts.** No parsing, conversion, or validation of artifact
+  content — canonical CEDAR JSON in, JSON-LD out, byte-for-byte, and deliberately **no dependency
+  on `cedar-artifact-library`**. YAML ↔ JSON translation belongs to `cedar-artifact-mcp`; if a
+  conversion concern appears here, it belongs there.
 - **Tests must pass with no skips**: `mvn test`. They are in-process — no browser, no CDN, no
   network. Anything that needs a real browser is a manual smoke test (README) — don't try to
   automate a browser in the unit tier.
@@ -28,7 +29,7 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-rest-mcp`):
   first use.
 - `Session` / `SessionStore` — in-memory; UUID ids; `firstSubmission()` future + latest-wins
   resubmission.
-- `ArtifactCodec` — trimmed copy of `cedar-rest-mcp`'s codec (template + instance arms only).
+- `Json` — JSON parse/serialize helpers; no artifact interpretation (DESIGN.md Principle 5).
 - `src/main/resources/web/session.html` — the entire frontend. Keep it small enough to read in
   one sitting.
 

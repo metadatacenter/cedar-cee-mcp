@@ -140,7 +140,7 @@ final class CeeWebServer
     String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
     ObjectNode instance;
     try {
-      instance = ArtifactCodec.asObjectNode(body);
+      instance = Json.asObject(body);
     } catch (RuntimeException e) {
       respond(exchange, 400, "text/plain",
           ("submitted metadata is not a JSON object: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
@@ -164,7 +164,7 @@ final class CeeWebServer
     data.set("templateObject", session.templateJson);
     if (session.instanceJson != null)
       data.set("instanceObject", session.instanceJson);
-    return ArtifactCodec.compactJson(data).getBytes(StandardCharsets.UTF_8);
+    return Json.compact(data).getBytes(StandardCharsets.UTF_8);
   }
 
   /**

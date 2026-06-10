@@ -40,18 +40,21 @@ the session id with the form left open, degrading to the robust two-step path
 privileged. A later Done press replaces an earlier submission (people fix mistakes); collection
 always returns the latest.
 
-## Principle 5 — YAML at the tool boundary, canonical JSON at the component boundary
+## Principle 5 — JSON in, JSON out; artifact translation lives elsewhere
 
-Like the sibling MCPs, artifacts cross the tool boundary as YAML (or JSON, auto-detected),
-converted via `cedar-artifact-library`. The CEE consumes the canonical CEDAR JSON form, so YAML
-input is converted on the way in; JSON input is passed through untouched. The artifact content is
-never massaged by hand on either path — conversion is the library's job, byte-for-byte.
+The CEE natively consumes canonical CEDAR JSON (JSON Schema templates, JSON-LD instances) and
+produces JSON-LD. This server hands that JSON through **byte-for-byte in both directions** and
+never parses, converts, validates, or otherwise interprets artifact content — it deliberately has
+no dependency on `cedar-artifact-library`. YAML ↔ JSON translation is `cedar-artifact-mcp`'s job
+(`template_to_json`, `instance_to_json`, `instance_to_yaml`); YAML handed to a tool here is
+rejected with a redirect to those tools, not converted. If a conversion concern ever seems to
+belong here, it belongs there.
 
 ## Principle 6 — Never lose the human's input
 
-The instance coming back from the CEE is converted to compact YAML for the conversation. If the
-library cannot read what the CEE produced, the raw JSON-LD is returned with a note instead of an
-error: a conversion quibble must never discard something a person just spent minutes typing.
+The instance coming back from the CEE is returned exactly as the editor produced it — untouched
+JSON-LD. Because nothing is converted, nothing can fail in a way that discards something a person
+just spent minutes typing.
 
 ## Principle 7 — Errors are content
 
@@ -63,9 +66,8 @@ the human sees what went wrong without opening a console.
 ## Note — pre-filling needs a complete instance
 
 The CEE lives in CEDAR's all-fields-present JSON world. Pre-filling `fill_instance` with a sparse
-instance (the form `cedar-artifact-mcp` produces) will not render; inflate it first against its
-template (`instance_to_json`). The output direction needs no such care — the library reader turns
-the CEE's complete JSON-LD into sparse compact YAML naturally.
+instance will not render; `cedar-artifact-mcp`'s `instance_to_json`, given the template, produces
+exactly the complete JSON-LD form the editor needs.
 
 ## Note — what the terminology URL buys
 

@@ -16,9 +16,9 @@ several items below are deliberate cuts, not oversights.
   (or confirm which font face the pinned CEE version expects) so the chrome looks right.
 
 - **Pre-fill ergonomics.** `fill_instance` with an existing instance requires the complete CEDAR
-  JSON form; a sparse instance must be inflated first via `cedar-artifact-mcp`. Once the artifact
-  library grows its template-driven inflater (see the library ROADMAP), inflate here
-  automatically — the template is already in hand.
+  JSON-LD form, which `cedar-artifact-mcp`'s `instance_to_json` produces given the template. If
+  that hand-off proves awkward in practice, revisit the flow — but artifact manipulation stays out
+  of this server (DESIGN.md Principle 5), so any fix belongs on the artifact-mcp side.
 
 ## Later / maybe
 

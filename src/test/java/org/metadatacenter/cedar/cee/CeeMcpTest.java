@@ -22,31 +22,36 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Exercises the codec, the session web server, and the tools end-to-end in process — the browser
- * is stubbed out and the CEE bundle is never fetched (these tests cover everything up to the
- * component boundary; rendering inside a real browser is the manual smoke test in the README).
+ * Exercises the session web server and the tools end-to-end in process — the browser is stubbed
+ * out and the CEE bundle is never fetched (these tests cover everything up to the component
+ * boundary; rendering inside a real browser is the manual smoke test in the README).
+ *
+ * <p>Artifacts are arbitrary JSON here: this server passes artifact JSON through byte-for-byte
+ * and never interprets it, so the fixtures only need to be JSON objects, not valid CEDAR.
  */
 final class CeeMcpTest
 {
   private static final ObjectMapper JACKSON = new ObjectMapper();
   private static final HttpClient HTTP = HttpClient.newHttpClient();
 
+  private static final String TEMPLATE_JSON = """
+      {
+        "@type": "https://schema.metadatacenter.org/core/Template",
+        "schema:name": "Patient Study"
+      }
+      """;
+
+  private static final String INSTANCE_JSON = """
+      {
+        "schema:name": "Patient Study metadata",
+        "schema:isBasedOn": "https://repo.metadatacenter.org/templates/123",
+        "Patient Name": {"@value": "Alice"}
+      }
+      """;
+
   private static final String TEMPLATE_YAML = """
       type: template
       name: Patient Study
-      children:
-        - key: Patient Name
-          type: text-field
-          name: Patient Name
-      """;
-
-  private static final String INSTANCE_YAML = """
-      type: instance
-      name: Patient Study metadata
-      isBasedOn: https://repo.metadatacenter.org/templates/123
-      children:
-        Patient Name:
-          value: Alice
       """;
 
   /** Never opens a real browser. */
@@ -64,40 +69,31 @@ final class CeeMcpTest
     web.stop();
   }
 
-  // ---------------------------------------------------------------- codec
+  // ---------------------------------------------------------------- JSON boundary
 
-  @Test void template_yaml_converts_to_canonical_json()
+  @Test void template_json_passes_through_untouched() throws Exception
   {
-    ObjectNode json = ArtifactCodec.templateToJson(TEMPLATE_YAML);
-    assertEquals("Patient Study", json.get("schema:name").asText());
-    assertTrue(json.has("properties"), "canonical template JSON carries a JSON Schema properties node");
+    call("show_template", Map.of("template", TEMPLATE_JSON));
+
+    Session session = sessions.all().get(0);
+    HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
+    ObjectNode served = (ObjectNode) JACKSON.readTree(data.body()).get("templateObject");
+    assertEquals(JACKSON.readTree(TEMPLATE_JSON), served,
+        "artifact JSON must reach the page byte-for-byte (no conversion, no additions)");
   }
 
-  @Test void template_json_passes_through_untouched()
+  @Test void yaml_input_is_redirected_to_the_artifact_mcp()
   {
-    String json = "{\"schema:name\": \"As Is\", \"@type\": \"https://schema.metadatacenter.org/core/Template\"}";
-    ObjectNode node = ArtifactCodec.templateToJson(json);
-    assertEquals("As Is", node.get("schema:name").asText());
-    assertFalse(node.has("properties"), "JSON input must not be round-tripped through the library");
-  }
-
-  @Test void instance_round_trips_yaml_to_json_to_compact_yaml()
-  {
-    ObjectNode instanceJson = ArtifactCodec.instanceToJson(INSTANCE_YAML);
-    assertEquals("https://repo.metadatacenter.org/templates/123",
-        instanceJson.get("schema:isBasedOn").asText());
-
-    String yaml = ArtifactCodec.instanceToCompactYaml(instanceJson);
-    assertTrue(yaml.contains("Alice"), "value survives the round trip; got:\n" + yaml);
-    assertTrue(yaml.contains("isBasedOn"), "instance identity survives; got:\n" + yaml);
+    McpSchema.CallToolResult result = call("show_template", Map.of("template", TEMPLATE_YAML));
+    assertTrue(result.isError());
+    assertTrue(text(result).contains("cedar-artifact-mcp"), text(result));
   }
 
   // ---------------------------------------------------------------- web server
 
   @Test void serves_host_page_and_session_data() throws Exception
   {
-    Session session = sessions.create(Session.Mode.VIEW_TEMPLATE,
-        ArtifactCodec.templateToJson(TEMPLATE_YAML), null);
+    Session session = sessions.create(Session.Mode.VIEW_TEMPLATE, Json.asObject(TEMPLATE_JSON), null);
     String url = web.sessionUrl(session);
 
     HttpResponse<String> page = get(url);
@@ -115,8 +111,7 @@ final class CeeMcpTest
 
   @Test void fill_session_data_is_editable_and_carries_terminology_url() throws Exception
   {
-    Session session = sessions.create(Session.Mode.FILL,
-        ArtifactCodec.templateToJson(TEMPLATE_YAML), null);
+    Session session = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
 
     HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
     ObjectNode config = (ObjectNode) JACKSON.readTree(data.body()).get("config");
@@ -133,11 +128,9 @@ final class CeeMcpTest
 
   @Test void submit_stores_the_instance_and_completes_the_future() throws Exception
   {
-    Session session = sessions.create(Session.Mode.FILL,
-        ArtifactCodec.templateToJson(TEMPLATE_YAML), null);
-    String body = ArtifactCodec.compactJson(ArtifactCodec.instanceToJson(INSTANCE_YAML));
+    Session session = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
 
-    HttpResponse<String> response = post(web.sessionUrl(session) + "/submit", body);
+    HttpResponse<String> response = post(web.sessionUrl(session) + "/submit", INSTANCE_JSON);
     assertEquals(204, response.statusCode());
     assertTrue(session.submittedInstance().isPresent());
     assertTrue(session.firstSubmission().isDone());
@@ -145,8 +138,7 @@ final class CeeMcpTest
 
   @Test void submit_to_a_read_only_session_is_rejected() throws Exception
   {
-    Session session = sessions.create(Session.Mode.VIEW_TEMPLATE,
-        ArtifactCodec.templateToJson(TEMPLATE_YAML), null);
+    Session session = sessions.create(Session.Mode.VIEW_TEMPLATE, Json.asObject(TEMPLATE_JSON), null);
     HttpResponse<String> response = post(web.sessionUrl(session) + "/submit", "{}");
     assertEquals(409, response.statusCode());
   }
@@ -155,15 +147,15 @@ final class CeeMcpTest
 
   @Test void show_template_returns_the_session_url()
   {
-    McpSchema.CallToolResult result = call("show_template", Map.of("template", TEMPLATE_YAML));
+    McpSchema.CallToolResult result = call("show_template", Map.of("template", TEMPLATE_JSON));
     assertFalse(result.isError(), text(result));
     assertTrue(text(result).contains("http://127.0.0.1:"), text(result));
   }
 
   @Test void show_instance_shows_empty_fields_by_default_and_hides_on_request() throws Exception
   {
-    call("show_instance", Map.of("template", TEMPLATE_YAML, "instance", INSTANCE_YAML));
-    call("show_instance", Map.of("template", TEMPLATE_YAML, "instance", INSTANCE_YAML,
+    call("show_instance", Map.of("template", TEMPLATE_JSON, "instance", INSTANCE_JSON));
+    call("show_instance", Map.of("template", TEMPLATE_JSON, "instance", INSTANCE_JSON,
         "hide_empty_fields", true));
 
     List<Session> created = sessions.all();
@@ -179,8 +171,8 @@ final class CeeMcpTest
 
   @Test void language_parameter_reaches_the_cee_config() throws Exception
   {
-    call("show_template", Map.of("template", TEMPLATE_YAML, "language", "de"));
-    call("fill_instance", Map.of("template", TEMPLATE_YAML, "timeout_seconds", 1));
+    call("show_template", Map.of("template", TEMPLATE_JSON, "language", "de"));
+    call("fill_instance", Map.of("template", TEMPLATE_JSON, "timeout_seconds", 1));
 
     List<Session> created = sessions.all();
     assertEquals("de", created.get(0).language);
@@ -196,7 +188,7 @@ final class CeeMcpTest
 
   @Test void show_instance_requires_both_artifacts()
   {
-    McpSchema.CallToolResult result = call("show_instance", Map.of("template", TEMPLATE_YAML));
+    McpSchema.CallToolResult result = call("show_instance", Map.of("template", TEMPLATE_JSON));
     assertTrue(result.isError());
     assertTrue(text(result).contains("instance"), text(result));
   }
@@ -204,25 +196,25 @@ final class CeeMcpTest
   @Test void fill_instance_times_out_with_a_collect_hint()
   {
     McpSchema.CallToolResult result = call("fill_instance",
-        Map.of("template", TEMPLATE_YAML, "timeout_seconds", 1));
+        Map.of("template", TEMPLATE_JSON, "timeout_seconds", 1));
     assertFalse(result.isError(), text(result));
     assertTrue(text(result).contains("collect_instance"), text(result));
     assertNotNull(sessionIdIn(text(result)));
   }
 
-  @Test void fill_instance_returns_yaml_once_the_user_submits()
+  @Test void fill_instance_returns_the_instance_once_the_user_submits()
   {
     // Simulate the user: submit the instance over HTTP shortly after the blocking call starts.
     CompletableFuture<McpSchema.CallToolResult> pending = CompletableFuture.supplyAsync(
-        () -> call("fill_instance", Map.of("template", TEMPLATE_YAML, "timeout_seconds", 30)));
+        () -> call("fill_instance", Map.of("template", TEMPLATE_JSON, "timeout_seconds", 30)));
 
     Session session = awaitSingleSession();
-    String body = ArtifactCodec.compactJson(ArtifactCodec.instanceToJson(INSTANCE_YAML));
     try {
-      assertEquals(204, post(web.sessionUrl(session) + "/submit", body).statusCode());
+      assertEquals(204, post(web.sessionUrl(session) + "/submit", INSTANCE_JSON).statusCode());
       McpSchema.CallToolResult result = pending.get();
       assertFalse(result.isError(), text(result));
       assertTrue(text(result).contains("Alice"), text(result));
+      assertTrue(text(result).contains("JSON-LD"), text(result));
     } catch (Exception e) {
       throw new AssertionError(e);
     }
@@ -230,15 +222,13 @@ final class CeeMcpTest
 
   @Test void collect_instance_reports_pending_then_returns_the_submission() throws Exception
   {
-    Session session = sessions.create(Session.Mode.FILL,
-        ArtifactCodec.templateToJson(TEMPLATE_YAML), null);
+    Session session = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
 
     McpSchema.CallToolResult before = call("collect_instance", Map.of("session_id", session.id));
     assertFalse(before.isError(), text(before));
     assertTrue(text(before).contains("not pressed Done"), text(before));
 
-    String body = ArtifactCodec.compactJson(ArtifactCodec.instanceToJson(INSTANCE_YAML));
-    post(web.sessionUrl(session) + "/submit", body);
+    post(web.sessionUrl(session) + "/submit", INSTANCE_JSON);
 
     McpSchema.CallToolResult after = call("collect_instance", Map.of("session_id", session.id));
     assertFalse(after.isError(), text(after));
@@ -253,7 +243,7 @@ final class CeeMcpTest
 
   @Test void list_sessions_shows_mode_and_submission_state()
   {
-    call("show_template", Map.of("template", TEMPLATE_YAML));
+    call("show_template", Map.of("template", TEMPLATE_JSON));
     McpSchema.CallToolResult result = call("list_sessions", Map.of());
     assertFalse(result.isError(), text(result));
     assertTrue(text(result).contains("VIEW_TEMPLATE"), text(result));
