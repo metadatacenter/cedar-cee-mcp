@@ -97,8 +97,9 @@ stays open; when the user says they're done, the LLM calls `collect_instance` wi
 
 *Show me the populated instance.*
 
-`show_instance` renders the instance read-only against its template — populated values only,
-empty fields hidden.
+`show_instance` renders the instance read-only against its template — the full form with the
+entered values in place. (Pass `hide_empty_fields: true` to omit unpopulated fields and see only
+the values the record holds.)
 
 From here the pipeline continues with the siblings: validate with `cedar-artifact-mcp`, persist
 with `cedar-rest-mcp`.
@@ -108,7 +109,7 @@ with `cedar-rest-mcp`.
 | Tool | What it does |
 |---|---|
 | `show_template(template)` | Read-only render of a template. Returns the page URL. |
-| `show_instance(template, instance)` | Read-only render of a populated instance (empty fields hidden). |
+| `show_instance(template, instance, hide_empty_fields?)` | Read-only render of a populated instance. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
 | `fill_instance(template, instance?, timeout_seconds?)` | Editable form; **blocks** until the user presses Done (default 120 s), then returns the instance as compact YAML. On timeout the session stays open. |
 | `collect_instance(session_id)` | Fetches the submitted instance after the fact — the non-blocking half of fill. Latest Done press wins. |
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |

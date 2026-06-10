@@ -95,15 +95,19 @@ final class CeeTools
     properties.put("template", templateProperty());
     properties.put("instance", Map.of("type", "string", "description",
         "The CEDAR template instance to display, as YAML or JSON (auto-detected)."));
+    properties.put("hide_empty_fields", Map.of("type", "boolean", "description",
+        "Omit template fields the instance has no value for, showing only the populated ones. "
+            + "Defaults to false: the full template structure shows, with empty fields blank."));
 
     McpSchema.Tool tool = McpSchema.Tool.builder()
         .name("show_instance")
         .title("Display a populated CEDAR instance in the browser (read-only)")
         .description("Renders a CEDAR template instance against its template as a read-only form "
             + "in the user's browser via the CEDAR Embeddable Editor. Accepts both artifacts as "
-            + "YAML or JSON (auto-detected). Empty fields are hidden; only populated values show. "
-            + "Returns the page URL; nothing is collected back. Always show the user the URL in "
-            + "case the browser tab did not open automatically.")
+            + "YAML or JSON (auto-detected). By default the full template structure shows, with "
+            + "unpopulated fields blank; pass hide_empty_fields:true to show only fields that "
+            + "hold a value. Returns the page URL; nothing is collected back. Always show the "
+            + "user the URL in case the browser tab did not open automatically.")
         .inputSchema(schema(properties, List.of("template", "instance")))
         .build();
 
@@ -117,7 +121,8 @@ final class CeeTools
       } catch (RuntimeException e) {
         return error("could not read the artifacts: " + e.getMessage());
       }
-      Session session = sessions.create(Session.Mode.VIEW_INSTANCE, templateJson, instanceJson);
+      Session session = sessions.create(Session.Mode.VIEW_INSTANCE, templateJson, instanceJson,
+          boolArg(args, "hide_empty_fields", false));
       return opened(session, "read-only instance view");
     });
   }
@@ -316,6 +321,16 @@ final class CeeTools
     if (value == null || value.isBlank())
       throw new IllegalArgumentException(key + " is required");
     return value;
+  }
+
+  private static boolean boolArg(Map<String, Object> args, String key, boolean defaultValue)
+  {
+    Object raw = args.get(key);
+    if (raw == null)
+      return defaultValue;
+    if (raw instanceof Boolean bool)
+      return bool;
+    return Boolean.parseBoolean(raw.toString().trim());
   }
 
   private static int intArg(Map<String, Object> args, String key, int defaultValue)

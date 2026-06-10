@@ -31,15 +31,17 @@ final class Session
   final Mode mode;
   final ObjectNode templateJson;
   final ObjectNode instanceJson; // null unless VIEW_INSTANCE, or FILL with a pre-filled instance
+  final boolean hideEmptyFields; // VIEW_INSTANCE only: omit unpopulated template fields from the view
   final Instant createdAt = Instant.now();
   private final CompletableFuture<ObjectNode> submitted = new CompletableFuture<>();
 
-  Session(String id, Mode mode, ObjectNode templateJson, ObjectNode instanceJson)
+  Session(String id, Mode mode, ObjectNode templateJson, ObjectNode instanceJson, boolean hideEmptyFields)
   {
     this.id = id;
     this.mode = mode;
     this.templateJson = templateJson;
     this.instanceJson = instanceJson;
+    this.hideEmptyFields = hideEmptyFields;
   }
 
   /** Record the instance the user submitted from the browser. Later submissions win: the user may

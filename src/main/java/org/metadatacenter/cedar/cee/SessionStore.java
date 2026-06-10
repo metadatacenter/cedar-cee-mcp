@@ -15,7 +15,14 @@ final class SessionStore
 
   Session create(Session.Mode mode, ObjectNode templateJson, ObjectNode instanceJson)
   {
-    Session session = new Session(UUID.randomUUID().toString(), mode, templateJson, instanceJson);
+    return create(mode, templateJson, instanceJson, false);
+  }
+
+  Session create(Session.Mode mode, ObjectNode templateJson, ObjectNode instanceJson,
+      boolean hideEmptyFields)
+  {
+    Session session =
+        new Session(UUID.randomUUID().toString(), mode, templateJson, instanceJson, hideEmptyFields);
     sessions.put(session.id, session);
     return session;
   }

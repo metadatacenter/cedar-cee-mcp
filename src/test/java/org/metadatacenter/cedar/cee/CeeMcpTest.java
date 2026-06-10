@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -157,6 +158,23 @@ final class CeeMcpTest
     McpSchema.CallToolResult result = call("show_template", Map.of("template", TEMPLATE_YAML));
     assertFalse(result.isError(), text(result));
     assertTrue(text(result).contains("http://127.0.0.1:"), text(result));
+  }
+
+  @Test void show_instance_shows_empty_fields_by_default_and_hides_on_request() throws Exception
+  {
+    call("show_instance", Map.of("template", TEMPLATE_YAML, "instance", INSTANCE_YAML));
+    call("show_instance", Map.of("template", TEMPLATE_YAML, "instance", INSTANCE_YAML,
+        "hide_empty_fields", true));
+
+    List<Session> created = sessions.all();
+    assertEquals(2, created.size());
+    for (Session session : created) {
+      HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
+      ObjectNode config = (ObjectNode) JACKSON.readTree(data.body()).get("config");
+      assertEquals(session.hideEmptyFields, config.get("hideEmptyFields").asBoolean());
+    }
+    assertFalse(created.get(0).hideEmptyFields, "default is to show the full template structure");
+    assertTrue(created.get(1).hideEmptyFields);
   }
 
   @Test void show_instance_requires_both_artifacts()

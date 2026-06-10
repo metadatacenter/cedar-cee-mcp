@@ -160,7 +160,7 @@ final class CeeWebServer
   {
     ObjectNode data = JACKSON.createObjectNode();
     data.put("mode", session.mode.name());
-    data.set("config", ceeConfig(session.mode));
+    data.set("config", ceeConfig(session));
     data.set("templateObject", session.templateJson);
     if (session.instanceJson != null)
       data.set("instanceObject", session.instanceJson);
@@ -168,11 +168,14 @@ final class CeeWebServer
   }
 
   /**
-   * The CEE configuration per mode. Read-only modes set {@code readOnlyMode}; the fill mode leaves
-   * the editor live and points ontology autocomplete at the CEDAR terminology proxy. The
+   * The CEE configuration per session. Read-only modes set {@code readOnlyMode}; the fill mode
+   * leaves the editor live and points ontology autocomplete at the CEDAR terminology proxy. The
    * {@code showInstanceData*} / {@code showTemplateSourceData} debug panels stay off everywhere.
+   * {@code hideEmptyFields} (CEE honors it in read-only mode only) follows the session's flag —
+   * a caller display preference on instance views, always off for bare-template views where every
+   * field is empty and hiding would blank the page.
    */
-  private ObjectNode ceeConfig(Session.Mode mode)
+  private ObjectNode ceeConfig(Session session)
   {
     ObjectNode config = JACKSON.createObjectNode();
     config.put("showInstanceDataCore", false);
@@ -180,11 +183,9 @@ final class CeeWebServer
     config.put("showTemplateSourceData", false);
     config.put("defaultLanguage", "en");
     config.put("terminologyIntegratedSearchUrl", TERMINOLOGY_URL);
-    if (mode != Session.Mode.FILL) {
+    if (session.mode != Session.Mode.FILL) {
       config.put("readOnlyMode", true);
-      // Hide empty fields when displaying a populated instance; show the full structure when
-      // displaying a bare template (everything is empty there — hiding would blank the page).
-      config.put("hideEmptyFields", mode == Session.Mode.VIEW_INSTANCE);
+      config.put("hideEmptyFields", session.hideEmptyFields);
     }
     return config;
   }
