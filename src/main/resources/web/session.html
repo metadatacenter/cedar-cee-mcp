@@ -57,6 +57,14 @@
   }
 
   async function boot() {
+    // This page only works served by cedar-cee-mcp at /s/<session-id>; opened standalone
+    // (file preview, double-click) there is no session and no server to talk to.
+    if (!location.protocol.startsWith('http') || !location.pathname.startsWith('/s/') || !sessionId) {
+      setStatus('This page is served by cedar-cee-mcp and cannot run standalone — open it '
+        + 'through a show_template, show_instance, or fill_instance tool call.', true);
+      return;
+    }
+
     try {
       await loadScript(CEE_CDN);
     } catch (cdnError) {
