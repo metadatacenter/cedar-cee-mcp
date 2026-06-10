@@ -17,8 +17,8 @@ with per-session data. Tools create sessions and (best-effort) open the user's b
 tool result carries the URL so a failed auto-open degrades to "click this".
 
 The security story is deliberately minimal and must stay honest about it: loopback bind +
-unguessable UUID session ids + in-memory sessions that die with the server. That is hackathon /
-local-exploration scope. Anything that would make this a deployable service (auth, TLS, session
+unguessable UUID session ids + in-memory sessions that die with the server. That is local,
+single-user scope. Anything that would make this a deployable service (auth, TLS, session
 persistence, non-loopback binds) is out of scope — see ROADMAP.md.
 
 ## Principle 3 — The CEE is a prebuilt, pinned dependency

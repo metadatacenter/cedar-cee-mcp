@@ -1,7 +1,7 @@
 # Roadmap
 
-Scope decisions and deferred work. The current iteration targets hackathon-style local
-exploration; several items below are deliberate cuts, not oversights.
+Scope decisions and deferred work. The server is local, single-user machinery by design;
+several items below are deliberate cuts, not oversights.
 
 ## Next
 

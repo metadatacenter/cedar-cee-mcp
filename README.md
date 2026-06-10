@@ -10,20 +10,31 @@ what "conformant" means.
 
 People, though, don't read JSON Schema — they meet a metadata standard as a **form**. CEDAR's
 answer is the
-[CEDAR Embeddable Editor](https://github.com/metadatacenter/cedar-embeddable-editor) (CEE), a web
-component that turns any CEDAR template into a structured metadata-entry form: typed fields,
-required-value enforcement, and autocomplete against the BioPortal ontology repository for
-controlled-term fields. Research platforms such as the Open Science Framework and Dryad embed it
-so researchers can produce standards-aligned metadata without leaving their own workflow.
+[CEDAR Embeddable Editor](https://github.com/metadatacenter/cedar-embeddable-editor) (CEE;
+[O'Connor et al. 2026](https://doi.org/10.5334/dsj-2026-002)), a web component that turns any
+CEDAR template into a structured metadata-entry form — typed fields, required-value enforcement,
+ontology-backed autocomplete via BioPortal, resolution of persistent identifiers such as ORCIDs
+and RORs — and emits semantically rich JSON-LD.
 
-This is a [Model Context Protocol](https://modelcontextprotocol.io/) server that brings those
-forms into an LLM-driven metadata workflow. A chat conversation is a poor place to *inspect* a
-structured template, and a worse place to *type in* twenty field values. The tools here let the
-LLM hand the screen over at exactly those moments: display a template or a finished metadata
-record in the user's browser for review (read-only), or open an editable form so the user enters
-values directly — picking ontology terms from autocomplete rather than dictating them through
-chat — with the completed record flowing back into the conversation as YAML for whatever comes
-next.
+The CEE's animating idea is that metadata authoring should be **embedded in the environments
+where people already work**, not delegated to a separate portal. Data platforms such as the Open
+Science Framework and Dryad embed it at the point of dataset submission; consortia such as HuBMAP
+and RADx use its read-only mode as the authoritative way to inspect their templates and records.
+Because forms are rendered from the template at runtime, an evolving community standard is
+reflected in every embedding with no interface code to rewrite — and across these deployments,
+putting structured authoring where the work happens has meant more complete, consistent, and
+semantically valid metadata.
+
+This is a [Model Context Protocol](https://modelcontextprotocol.io/) server that makes the LLM
+conversation one more environment the CEE is embedded in. Metadata work increasingly starts in
+such conversations — an LLM can draft a template, find the right ontology terms, assemble and
+validate records — but a chat transcript is a poor place to *inspect* a structured artifact, and
+a worse place to *type in* twenty field values. The tools here let the LLM hand the screen over
+at exactly those moments: display a template or a finished metadata record in the user's browser
+for review (read-only, the same mode HuBMAP and RADx rely on), or open an editable form so the
+user enters values directly — picking ontology terms from autocomplete rather than dictating them
+through chat — with the completed record flowing back into the conversation as YAML for whatever
+comes next.
 
 `cedar-cee-mcp` is one of four MCP servers that together cover a metadata pipeline:
 [`cedar-artifact-mcp`](https://github.com/metadatacenter/cedar-artifact-mcp) **authors** templates
@@ -126,7 +137,7 @@ No configuration is required. Optional environment variables (set in the MCP cli
 
 | Variable | Effect |
 |---|---|
-| `CEDAR_CEE_BUNDLE` | Path to a locally vendored `cedar-embeddable-editor.min.js`, served as a fallback when the CDN is unreachable (e.g. hackathon Wi-Fi). Get it with: `curl -L -o cedar-embeddable-editor.min.js https://cdn.jsdelivr.net/npm/cedar-embeddable-editor@1.5.0/cedar-embeddable-editor.min.js` |
+| `CEDAR_CEE_BUNDLE` | Path to a locally vendored `cedar-embeddable-editor.min.js`, served as a fallback when the CDN is unreachable (offline or restricted networks). Get it with: `curl -L -o cedar-embeddable-editor.min.js https://cdn.jsdelivr.net/npm/cedar-embeddable-editor@1.5.0/cedar-embeddable-editor.min.js` |
 | `CEDAR_CEE_TERMINOLOGY_URL` | Override the terminology endpoint for controlled-term autocomplete. Defaults to CEDAR's public proxy (`https://terminology.metadatacenter.org/bioportal/integrated-search`). |
 | `CEDAR_CEE_NO_BROWSER` | Set to `1` to never auto-open a browser (the tools still return the URL). |
 
