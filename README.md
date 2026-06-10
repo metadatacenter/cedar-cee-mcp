@@ -16,7 +16,7 @@ CEDAR template into a structured metadata-entry form — typed fields, required-
 ontology-backed autocomplete via BioPortal, resolution of persistent identifiers such as ORCIDs
 and RORs — and emits semantically rich JSON-LD.
 
-The CEE's animating idea is that metadata authoring should be **embedded in the environments
+The CEE's motivating idea is that metadata authoring should be **embedded in the environments
 where people already work**, not delegated to a separate portal. Data platforms such as the Open
 Science Framework and Dryad embed it at the point of dataset submission; consortia such as HuBMAP
 and RADx use its read-only mode as the authoritative way to inspect their templates and instances.
