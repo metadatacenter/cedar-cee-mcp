@@ -1,24 +1,41 @@
 # cedar-cee-mcp
 
-An MCP server that puts a **human in the loop** of a CEDAR metadata workflow: it displays CEDAR
-**templates** and **instances** in the user's browser via the
-[CEDAR Embeddable Editor](https://github.com/metadatacenter/cedar-embeddable-editor) (CEE), and —
-for instance population — collects what the human typed back into the conversation as YAML.
+[CEDAR](https://metadatacenter.org/) — the Center for Expanded Data Annotation and Retrieval —
+builds tools for authoring and applying metadata templates over scientific datasets. A CEDAR
+**template** encodes a community's metadata standard in machine-actionable form — its fields,
+their value types, and the controlled vocabularies they draw from — and an **instance** is a
+template populated with values describing an actual dataset. Rich, standards-conformant metadata
+is what makes scientific data findable and reusable; templates are how a community says precisely
+what "conformant" means.
 
-It completes a trio:
+People, though, don't read JSON Schema — they meet a metadata standard as a **form**. CEDAR's
+answer is the
+[CEDAR Embeddable Editor](https://github.com/metadatacenter/cedar-embeddable-editor) (CEE), a web
+component that turns any CEDAR template into a structured metadata-entry form: typed fields,
+required-value enforcement, and autocomplete against the BioPortal ontology repository for
+controlled-term fields. Research platforms such as the Open Science Framework and Dryad embed it
+so researchers can produce standards-aligned metadata without leaving their own workflow.
 
-- [`cedar-artifact-mcp`](../cedar-artifact-mcp) **authors** artifacts in memory;
-- [`cedar-rest-mcp`](../cedar-rest-mcp) **persists** them to a CEDAR server;
-- `cedar-cee-mcp` **shows** them to a person, and lets a person **fill in** an instance using a
-  real form — with the CEE's ontology-backed autocomplete for controlled-term fields — instead of
-  dictating values through chat.
+This is a [Model Context Protocol](https://modelcontextprotocol.io/) server that brings those
+forms into an LLM-driven metadata workflow. A chat conversation is a poor place to *inspect* a
+structured template, and a worse place to *type in* twenty field values. The tools here let the
+LLM hand the screen over at exactly those moments: display a template or a finished metadata
+record in the user's browser for review (read-only), or open an editable form so the user enters
+values directly — picking ontology terms from autocomplete rather than dictating them through
+chat — with the completed record flowing back into the conversation as YAML for whatever comes
+next.
 
-An MCP server is headless, so the display surface is conjured: each tool stores a session on a
-tiny loopback-only web server, opens `http://127.0.0.1:<port>/s/<session>` in the user's default
-browser, and that page hosts the CEE web component. The CEE bundle is loaded from the CDN
-(pinned), with an optional locally vendored fallback.
+`cedar-cee-mcp` is one of four MCP servers that together cover a metadata pipeline:
+[`cedar-artifact-mcp`](https://github.com/metadatacenter/cedar-artifact-mcp) **authors** templates
+and instances, [`bioportal-term-mcp`](https://github.com/metadatacenter/bioportal-term-mcp)
+supplies the **ontology terms** they bind to,
+[`cedar-rest-mcp`](https://github.com/metadatacenter/cedar-rest-mcp) **persists** them to a CEDAR
+server — and this one is where a person **sees and completes** them.
 
-See [DESIGN.md](./DESIGN.md) for the principles and [ROADMAP.md](./ROADMAP.md) for deferred work.
+Everything runs on your own machine: each tool serves a private page from the MCP server itself
+and opens it in your browser; nothing is deployed, hosted, or shared (mechanics in
+[How it works](#how-it-works) below). See [DESIGN.md](./DESIGN.md) for the principles and
+[ROADMAP.md](./ROADMAP.md) for deferred work.
 
 ## Example workflow
 
@@ -46,7 +63,7 @@ tab didn't open); nothing is collected back.
 
 *Let me fill in a record for this template.*
 
-`fill_instance` opens an **editable** form and blocks. The user types values — controlled-term
+`fill_instance` opens an **editable** form and waits. The user types values — controlled-term
 fields autocomplete against BioPortal via the CEDAR terminology service — and presses the form's
 **Done** button. The tool call returns with the populated instance:
 
@@ -91,8 +108,17 @@ with `cedar-rest-mcp`.
 - **Pre-filling** `fill_instance` with an existing instance requires a *complete* CEDAR JSON
   instance (the CEE's world). A sparse instance from `cedar-artifact-mcp` should be inflated
   first (`instance_to_json` given the template).
-- Sessions are **in-memory** and die with the server; ids are unguessable UUIDs; the web server
-  binds to the loopback interface only.
+
+## How it works
+
+An MCP server is a headless process — it has no screen of its own. To show a form, this server
+runs a tiny web server on your machine (bound to `127.0.0.1` on a random port) serving one static
+page per session. That page loads the CEE web component from the CDN (pinned version, with an
+optional locally vendored fallback for offline use), renders the session's template or instance,
+and — in editable mode — sends what the user entered back to the server when they press **Done**,
+where the waiting `fill_instance` (or a later `collect_instance`) picks it up. Sessions live in
+memory, are addressed by unguessable ids, and die with the server. This is deliberately local,
+single-user machinery, not a deployable service (DESIGN.md, Principle 2).
 
 ## Configuration
 
