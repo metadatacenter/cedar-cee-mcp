@@ -36,9 +36,9 @@ several items below are deliberate cuts, not oversights.
   display modes keeps one component and one spike; switch the `show_*` tools to CAV if its
   rendering proves better for inspection.
 
-- **Vendoring the bundle into the jar.** The CEE bundle could be shaded into the jar's resources
-  instead of the `CEDAR_CEE_BUNDLE` file-path fallback, making the server fully offline-capable
-  at the cost of a fatter artifact and a manual step per CEE upgrade.
+- **Offline use.** The CEE bundle is loaded from the CDN; an offline environment has no fallback.
+  If that need materializes, vendor the bundle into the jar's resources and serve it locally —
+  a fatter artifact and a manual step per CEE upgrade.
 
 ## Out of scope
 

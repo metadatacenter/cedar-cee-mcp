@@ -5,20 +5,14 @@ import java.util.Locale;
 
 /**
  * Opens a URL in the user's default browser. Best-effort: every tool result includes the URL
- * regardless, so a failed (or disabled) auto-open just means the user clicks the link instead.
- * Set {@code CEDAR_CEE_NO_BROWSER=1} to disable auto-opening (tests, headless environments).
+ * regardless, so a failed auto-open just means the user clicks the link instead. Tests inject a
+ * no-op subclass rather than opening anything.
  */
 class BrowserOpener
 {
-  static final String NO_BROWSER_ENV = "CEDAR_CEE_NO_BROWSER";
-
   /** @return true if a browser-open command was launched. */
   boolean open(String url)
   {
-    String disabled = System.getenv(NO_BROWSER_ENV);
-    if (disabled != null && !disabled.isBlank() && !"0".equals(disabled.trim()))
-      return false;
-
     String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
     String[] command;
     if (os.contains("mac"))

@@ -120,7 +120,7 @@ final class CeeMcpTest
     HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
     ObjectNode config = (ObjectNode) JACKSON.readTree(data.body()).get("config");
     assertFalse(config.has("readOnlyMode"), "fill mode leaves the editor live");
-    assertEquals(CeeWebServer.DEFAULT_TERMINOLOGY_URL,
+    assertEquals(CeeWebServer.TERMINOLOGY_URL,
         config.get("terminologyIntegratedSearchUrl").asText());
   }
 

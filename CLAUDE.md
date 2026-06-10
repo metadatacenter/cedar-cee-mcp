@@ -24,8 +24,8 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-rest-mcp`):
 
 - `CedarCeeMcpServer` — main; stdio MCP wiring, ping.
 - `CeeTools` — the five tools; all return the session URL; fill blocks on the session future.
-- `CeeWebServer` — loopback HTTP: host page, per-session data, submit endpoint, vendored-bundle
-  fallback. Lazy-started on first use.
+- `CeeWebServer` — loopback HTTP: host page, per-session data, submit endpoint. Lazy-started on
+  first use.
 - `Session` / `SessionStore` — in-memory; UUID ids; `firstSubmission()` future + latest-wins
   resubmission.
 - `ArtifactCodec` — trimmed copy of `cedar-rest-mcp`'s codec (template + instance arms only).
@@ -39,6 +39,6 @@ mvn package    # shaded jar: target/cedar-cee-mcp-<version>-all.jar
 mvn test       # unit tests, no network
 ```
 
-Env knobs: `CEDAR_CEE_NO_BROWSER=1` (never auto-open — used by tests via an injected
-`BrowserOpener` instead), `CEDAR_CEE_BUNDLE` (vendored bundle fallback path),
-`CEDAR_CEE_TERMINOLOGY_URL` (autocomplete endpoint override).
+There are no environment variables, deliberately. Tests suppress browser-opening by injecting a
+no-op `BrowserOpener` subclass; the terminology endpoint and CEE version are constants
+(`CeeWebServer.TERMINOLOGY_URL`, the version string in `session.html`).

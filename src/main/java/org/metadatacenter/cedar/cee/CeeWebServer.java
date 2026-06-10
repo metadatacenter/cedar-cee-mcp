@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
@@ -28,8 +26,6 @@ import java.util.concurrent.Executors;
  *       instance as one JSON object;</li>
  *   <li>{@code POST /s/{id}/submit} — the populated JSON-LD instance from the browser's Done
  *       button;</li>
- *   <li>{@code GET /cee/cedar-embeddable-editor.min.js} — a locally vendored CEE bundle
- *       (env {@code CEDAR_CEE_BUNDLE}), the page's fallback when the CDN is unreachable;</li>
  *   <li>{@code GET /health} — liveness probe.</li>
  * </ul>
  *
@@ -38,23 +34,18 @@ import java.util.concurrent.Executors;
  */
 final class CeeWebServer
 {
-  static final String BUNDLE_ENV = "CEDAR_CEE_BUNDLE";
-  static final String TERMINOLOGY_ENV = "CEDAR_CEE_TERMINOLOGY_URL";
-  static final String DEFAULT_TERMINOLOGY_URL =
+  /** CEDAR's public terminology proxy, backing the CEE's controlled-term autocomplete. */
+  static final String TERMINOLOGY_URL =
       "https://terminology.metadatacenter.org/bioportal/integrated-search";
 
   private static final ObjectMapper JACKSON = new ObjectMapper();
 
   private final SessionStore sessions;
-  private final String terminologyUrl;
   private HttpServer server; // guarded by this
 
   CeeWebServer(SessionStore sessions)
   {
     this.sessions = sessions;
-    String configured = System.getenv(TERMINOLOGY_ENV);
-    this.terminologyUrl = (configured == null || configured.isBlank())
-        ? DEFAULT_TERMINOLOGY_URL : configured.trim();
   }
 
   /** Start the server if it isn't running and return its base URL, e.g. {@code http://127.0.0.1:49213}. */
@@ -105,8 +96,6 @@ final class CeeWebServer
 
       if ("GET".equals(method) && "/health".equals(path)) {
         respond(exchange, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
-      } else if ("GET".equals(method) && "/cee/cedar-embeddable-editor.min.js".equals(path)) {
-        serveVendoredBundle(exchange);
       } else if (path.startsWith("/s/")) {
         routeSession(exchange, method, path);
       } else {
@@ -190,7 +179,7 @@ final class CeeWebServer
     config.put("showInstanceDataFull", false);
     config.put("showTemplateSourceData", false);
     config.put("defaultLanguage", "en");
-    config.put("terminologyIntegratedSearchUrl", terminologyUrl);
+    config.put("terminologyIntegratedSearchUrl", TERMINOLOGY_URL);
     if (mode != Session.Mode.FILL) {
       config.put("readOnlyMode", true);
       // Hide empty fields when displaying a populated instance; show the full structure when
@@ -207,25 +196,6 @@ final class CeeWebServer
         throw new IllegalStateException("host page resource /web/session.html missing from jar");
       return in.readAllBytes();
     }
-  }
-
-  private void serveVendoredBundle(HttpExchange exchange) throws IOException
-  {
-    String bundlePath = System.getenv(BUNDLE_ENV);
-    if (bundlePath == null || bundlePath.isBlank()) {
-      respond(exchange, 404, "text/plain",
-          ("no vendored CEE bundle: set " + BUNDLE_ENV + " to a local copy of "
-              + "cedar-embeddable-editor.min.js (used as fallback when the CDN is unreachable)")
-              .getBytes(StandardCharsets.UTF_8));
-      return;
-    }
-    Path file = Path.of(bundlePath.trim());
-    if (!Files.isReadable(file)) {
-      respond(exchange, 404, "text/plain",
-          (BUNDLE_ENV + " points at an unreadable file: " + file).getBytes(StandardCharsets.UTF_8));
-      return;
-    }
-    respond(exchange, 200, "application/javascript", Files.readAllBytes(file));
   }
 
   private static void respond(HttpExchange exchange, int status, String contentType, byte[] body)

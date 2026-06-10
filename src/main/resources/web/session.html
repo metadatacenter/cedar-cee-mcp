@@ -34,10 +34,8 @@
 </div>
 
 <script>
-  // The CEE web-component bundle, pinned. Primary source is the CDN; the local /cee/ path is the
-  // server's vendored fallback (env CEDAR_CEE_BUNDLE) for offline / locked-down networks.
+  // The CEE web-component bundle, pinned, loaded from the CDN.
   const CEE_CDN = 'https://cdn.jsdelivr.net/npm/cedar-embeddable-editor@1.5.0/cedar-embeddable-editor.min.js';
-  const CEE_LOCAL = '/cee/cedar-embeddable-editor.min.js';
 
   const sessionId = location.pathname.split('/')[2];
   const statusEl = document.getElementById('status');
@@ -62,13 +60,9 @@
     try {
       await loadScript(CEE_CDN);
     } catch (cdnError) {
-      try {
-        await loadScript(CEE_LOCAL);
-      } catch (localError) {
-        setStatus('Could not load the CEE bundle from the CDN or the local fallback. '
-          + 'Check your network, or vendor the bundle and set CEDAR_CEE_BUNDLE (see README).', true);
-        return;
-      }
+      setStatus('Could not load the CEE bundle from the CDN. Check your network connection '
+        + 'and reload this page.', true);
+      return;
     }
 
     await customElements.whenDefined('cedar-embeddable-editor');

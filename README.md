@@ -56,6 +56,7 @@ Patient Study template with `cedar-artifact-mcp`:
 ```yaml
 type: template
 name: Patient Study
+id: https://repo.metadatacenter.org/templates/7f1c9e4a-5b2d-4e8f-a3c6-9d0b2f5a8c1e
 children:
   - key: Patient Name
     type: text-field
@@ -81,7 +82,8 @@ fields autocomplete against BioPortal via the CEDAR terminology service — and 
 ```yaml
 type: instance
 name: Patient Study metadata
-isBasedOn: https://repo.metadatacenter.org/templates/...
+id: https://repo.metadatacenter.org/template-instances/4b8e2d7f-9a1c-4f5b-b6e3-2c7a0d9f4e8b
+isBasedOn: https://repo.metadatacenter.org/templates/7f1c9e4a-5b2d-4e8f-a3c6-9d0b2f5a8c1e
 children:
   Patient Name:
     value: Alice
@@ -124,24 +126,17 @@ with `cedar-rest-mcp`.
 
 An MCP server is a headless process — it has no screen of its own. To show a form, this server
 runs a tiny web server on your machine (bound to `127.0.0.1` on a random port) serving one static
-page per session. That page loads the CEE web component from the CDN (pinned version, with an
-optional locally vendored fallback for offline use), renders the session's template or instance,
-and — in editable mode — sends what the user entered back to the server when they press **Done**,
-where the waiting `fill_instance` (or a later `collect_instance`) picks it up. Sessions live in
-memory, are addressed by unguessable ids, and die with the server. This is deliberately local,
-single-user machinery, not a deployable service (DESIGN.md, Principle 2).
+page per session. That page loads the CEE web component from the CDN (pinned version), renders
+the session's template or instance, and — in editable mode — sends what the user entered back to
+the server when they press **Done**, where the waiting `fill_instance` (or a later
+`collect_instance`) picks it up. Controlled-term autocomplete talks to CEDAR's public terminology
+service directly from the browser. Sessions live in memory, are addressed by unguessable ids, and
+die with the server. This is deliberately local, single-user machinery, not a deployable service
+(DESIGN.md, Principle 2).
 
 ## Configuration
 
-No configuration is required. Optional environment variables (set in the MCP client's config):
-
-| Variable | Effect |
-|---|---|
-| `CEDAR_CEE_BUNDLE` | Path to a locally vendored `cedar-embeddable-editor.min.js`, served as a fallback when the CDN is unreachable (offline or restricted networks). Get it with: `curl -L -o cedar-embeddable-editor.min.js https://cdn.jsdelivr.net/npm/cedar-embeddable-editor@1.5.0/cedar-embeddable-editor.min.js` |
-| `CEDAR_CEE_TERMINOLOGY_URL` | Override the terminology endpoint for controlled-term autocomplete. Defaults to CEDAR's public proxy (`https://terminology.metadatacenter.org/bioportal/integrated-search`). |
-| `CEDAR_CEE_NO_BROWSER` | Set to `1` to never auto-open a browser (the tools still return the URL). |
-
-Registration for Claude Code (`~/.claude.json`):
+There is nothing to configure. Registration for Claude Code (`~/.claude.json`):
 
 ```json
 "cedar-cee": {
@@ -160,8 +155,8 @@ editing the config.
   checkout of
   [metadatacenter/cedar-artifact-library](https://github.com/metadatacenter/cedar-artifact-library)
   on `develop`).
-- A browser, and network access to the CDN (or a vendored bundle) and — for controlled-term
-  autocomplete — the CEDAR terminology service.
+- A browser, and network access to the CDN and — for controlled-term autocomplete — the CEDAR
+  terminology service.
 
 ## Build
 
@@ -175,7 +170,7 @@ mvn test           # unit tests — in-process, no browser, no CDN
 Protocol-level (no browser):
 
 ```bash
-cat <<'EOF' | CEDAR_CEE_NO_BROWSER=1 java -jar target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar
+cat <<'EOF' | java -jar target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}
 {"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}

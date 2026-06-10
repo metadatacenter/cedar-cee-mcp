@@ -24,9 +24,9 @@ persistence, non-loopback binds) is out of scope — see ROADMAP.md.
 ## Principle 3 — The CEE is a prebuilt, pinned dependency
 
 The CEE is consumed as the single self-contained web-component bundle its npm package publishes
-(`cedar-embeddable-editor.min.js`), pinned by version and loaded from the CDN, with an optional
-locally vendored fallback (`CEDAR_CEE_BUNDLE`). There is no frontend build step, no npm, no
-Angular toolchain in this repo. The host page is hand-written static HTML small enough to read in
+(`cedar-embeddable-editor.min.js`), pinned by version and loaded from the CDN. There is no
+frontend build step, no npm, no Angular toolchain in this repo — and no configuration: the
+server's only knobs are the version string in the host page and constants in the code. The host page is hand-written static HTML small enough to read in
 one sitting. Upgrading the CEE means changing one version string in the host page after a manual
 browser check.
 
