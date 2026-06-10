@@ -19,7 +19,7 @@ and RORs — and emits semantically rich JSON-LD.
 The CEE's animating idea is that metadata authoring should be **embedded in the environments
 where people already work**, not delegated to a separate portal. Data platforms such as the Open
 Science Framework and Dryad embed it at the point of dataset submission; consortia such as HuBMAP
-and RADx use its read-only mode as the authoritative way to inspect their templates and records.
+and RADx use its read-only mode as the authoritative way to inspect their templates and instances.
 Because forms are rendered from the template at runtime, an evolving community standard is
 reflected in every embedding with no interface code to rewrite — and across these deployments,
 putting structured authoring where the work happens has meant more complete, consistent, and
@@ -28,12 +28,12 @@ semantically valid metadata.
 This is a [Model Context Protocol](https://modelcontextprotocol.io/) server that makes the LLM
 conversation one more environment the CEE is embedded in. Metadata work increasingly starts in
 such conversations — an LLM can draft a template, find the right ontology terms, assemble and
-validate records — but a chat transcript is a poor place to *inspect* a structured artifact, and
+validate instances — but a chat transcript is a poor place to *inspect* a structured artifact, and
 a worse place to *type in* twenty field values. The tools here let the LLM hand the screen over
-at exactly those moments: display a template or a finished metadata record in the user's browser
+at exactly those moments: display a template or a populated instance in the user's browser
 for review (read-only, the same mode HuBMAP and RADx rely on), or open an editable form so the
 user enters values directly — picking ontology terms from autocomplete rather than dictating them
-through chat — with the completed record flowing back into the conversation for whatever comes
+through chat — with the completed instance flowing back into the conversation for whatever comes
 next.
 
 `cedar-cee-mcp` is one of four MCP servers that together cover a metadata pipeline:
@@ -80,13 +80,13 @@ the tools below.
 fields, and constraints, inputs disabled. The tool returns the URL (shown to the user in case the
 tab didn't open); nothing is collected back.
 
-*Let me fill in a record for this template.*
+*Let me fill in an instance of this template.*
 
 `fill_instance` opens an **editable** form and waits. The user types values — controlled-term
 fields autocomplete against BioPortal via the CEDAR terminology service — and presses the form's
 **Done** button. The tool call returns with the populated instance as **JSON-LD, exactly as the
 editor produced it**. Rendered as compact YAML by `cedar-artifact-mcp`'s `instance_to_yaml`, the
-record reads:
+instance reads:
 
 ```yaml
 type: instance
@@ -109,7 +109,7 @@ user says they're done, the LLM calls `collect_instance` with that id.
 
 `show_instance` renders the instance read-only against its template — the full form with the
 entered values in place. (Pass `hide_empty_fields: true` to omit unpopulated fields and see only
-the values the record holds.)
+the values the instance holds.)
 
 From here the pipeline continues with the siblings: validate with `cedar-artifact-mcp`, persist
 with `cedar-rest-mcp`.
