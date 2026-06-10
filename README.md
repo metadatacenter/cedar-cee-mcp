@@ -121,16 +121,18 @@ entered values in place.
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
 
-- **`template` / `instance`** are **canonical CEDAR JSON** — the JSON Schema and JSON-LD forms
-  the CEE natively consumes — passed through **byte-for-byte**. This server does no format
-  conversion and never interprets artifact content; convert YAML with `cedar-artifact-mcp`
-  (`template_to_json` / `instance_to_json`), and convert a returned instance to YAML with its
-  `instance_to_yaml` if desired.
-- **Pre-filling** `fill_instance` with an existing instance requires a *complete* CEDAR JSON
-  instance (the CEE's world); `cedar-artifact-mcp`'s `instance_to_json` given the template
-  produces exactly that form.
-- **`language`** sets the editor's UI language (ISO code, e.g. `"de"`); untranslated strings fall
-  back to English.
+The `template` and `instance` arguments are canonical CEDAR JSON — the JSON Schema and JSON-LD
+forms the CEE natively consumes — and pass through byte-for-byte. This server does no format
+conversion and never interprets artifact content. To work in YAML, translate with
+`cedar-artifact-mcp`: `template_to_json` and `instance_to_json` on the way in, and
+`instance_to_yaml` for a returned instance if desired.
+
+Pre-filling `fill_instance` with an existing instance requires a complete CEDAR JSON instance —
+the all-fields-present form the editor expects. `cedar-artifact-mcp`'s `instance_to_json`, given
+the template, produces exactly that form.
+
+The optional `language` argument sets the editor's UI language as an ISO code (for example,
+`"de"`); untranslated strings fall back to English.
 
 ## How it works
 
