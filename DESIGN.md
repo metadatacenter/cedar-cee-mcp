@@ -6,7 +6,7 @@ Principles governing `cedar-cee-mcp`. Read before adding a tool or changing the 
 
 This MCP does exactly two things: render CEDAR artifacts for a human (read-only), and let a human
 populate a template instance through a real form. It does not author templates (that's
-`cedar-artifact-mcp`), persist anything (that's `cedar-rest-mcp`), or validate (both siblings do).
+`cedar-artifact-mcp`), persist anything (that's `cedar-artifact-rest-mcp`), or validate (both siblings do).
 The three compose: author → show/fill → validate → persist.
 
 ## Principle 2 — A headless server conjures a browser

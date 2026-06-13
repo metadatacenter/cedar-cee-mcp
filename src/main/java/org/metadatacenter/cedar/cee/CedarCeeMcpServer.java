@@ -15,7 +15,7 @@ import java.util.Map;
  * MCP server that displays CEDAR templates and instances in the user's browser via the CEDAR
  * Embeddable Editor (CEE), and collects user-populated instances back into the conversation. The
  * form-presentation counterpart to {@code cedar-artifact-mcp} (authoring) and
- * {@code cedar-rest-mcp} (persistence).
+ * {@code cedar-artifact-rest-mcp} (persistence).
  *
  * <p>The display surface is a loopback-only web server ({@link CeeWebServer}) hosting a single
  * page that loads the CEE web-component bundle; tools ({@link CeeTools}) create sessions, open

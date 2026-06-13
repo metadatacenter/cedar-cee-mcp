@@ -6,7 +6,7 @@ deferred work). [README.md](./README.md) is the user-facing story.
 
 ## Conventions you must respect
 
-Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-rest-mcp`):
+Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest-mcp`):
 
 - **Comments describe code-level facts only.** No PR numbers, session context, or anything that
   needs the authoring context to make sense.

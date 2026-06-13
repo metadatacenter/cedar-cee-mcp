@@ -41,7 +41,7 @@ metadata pipeline:
 [`cedar-artifact-mcp`](https://github.com/metadatacenter/cedar-artifact-mcp) **authors** templates
 and instances, [`bioportal-term-mcp`](https://github.com/metadatacenter/bioportal-term-mcp)
 supplies the **ontology terms** they bind to,
-[`cedar-rest-mcp`](https://github.com/metadatacenter/cedar-rest-mcp) **persists** them to a CEDAR
+[`cedar-artifact-rest-mcp`](https://github.com/metadatacenter/cedar-artifact-rest-mcp) **persists** them to a CEDAR
 server — and this one is where a person **sees and completes** them.
 
 Everything runs on your own machine: each tool serves a private page from the MCP server itself
