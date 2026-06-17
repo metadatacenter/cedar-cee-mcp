@@ -113,7 +113,8 @@ final class EndToEndStdioIT
 
   @Test @Order(2) void ping_round_trips() throws IOException
   {
-    assertEquals("pong: it", toolText(call("ping", Map.of("message", "it"))));
+    assertTrue(toolText(call("ping", Map.of("message", "it"))).startsWith("pong: it ("),
+        "ping reply should echo the message and append the server name and version");
   }
 
   @Test @Order(3) void shaded_jar_serves_the_host_page_and_session_data() throws Exception
