@@ -29,8 +29,9 @@ import java.util.function.BiFunction;
  *   <li>{@code list_sessions} — what is currently showing.</li>
  * </ul>
  *
- * <p>Artifacts cross this boundary as canonical CEDAR JSON only, untouched in both directions;
- * YAML translation belongs to {@code cedar-artifact-mcp} (DESIGN.md Principle 5).
+ * <p>Artifacts may be supplied as the compact YAML exchange form or as canonical CEDAR JSON;
+ * YAML is converted to JSON via {@code cedar-artifact-library} before it reaches the CEE. The
+ * populated instance comes back from the CEE as JSON-LD, exactly as the editor produced it.
  */
 final class CeeTools
 {
@@ -72,8 +73,8 @@ final class CeeTools
         .title("Display a CEDAR template in the browser (read-only)")
         .description("Renders a CEDAR template as a read-only form in the user's browser via the "
             + "CEDAR Embeddable Editor, so a human can inspect its structure, fields, and "
-            + "constraints. Takes the template as canonical CEDAR JSON (convert YAML first with "
-            + "cedar-artifact-mcp's template_to_json). Returns the page URL; nothing is collected "
+            + "constraints. Takes the template as YAML (the compact exchange form) or canonical "
+            + "CEDAR JSON. Returns the page URL; nothing is collected "
             + "back. Always show the user the URL in case the browser tab did not open "
             + "automatically.")
         .inputSchema(schema(properties, List.of("template")))
@@ -100,8 +101,8 @@ final class CeeTools
     Map<String, Object> properties = new LinkedHashMap<>();
     properties.put("template", templateProperty());
     properties.put("instance", Map.of("type", "string", "description",
-        "The CEDAR template instance to display, as canonical CEDAR JSON-LD (convert YAML first "
-            + "with cedar-artifact-mcp's instance_to_json)."));
+        "The CEDAR template instance to display, as YAML (the compact exchange form) or canonical "
+            + "CEDAR JSON-LD."));
     properties.put("hide_empty_fields", Map.of("type", "boolean", "description",
         "Omit template fields the instance has no value for, showing only the populated ones. "
             + "Defaults to false: the full template structure shows, with empty fields blank."));
@@ -112,7 +113,7 @@ final class CeeTools
         .title("Display a populated CEDAR instance in the browser (read-only)")
         .description("Renders a CEDAR template instance against its template as a read-only form "
             + "in the user's browser via the CEDAR Embeddable Editor. Takes both artifacts as "
-            + "canonical CEDAR JSON (convert YAML first with cedar-artifact-mcp). By default the "
+            + "YAML (the compact exchange form) or canonical CEDAR JSON. By default the "
             + "full template structure shows, with unpopulated fields blank; pass "
             + "hide_empty_fields:true to show only fields that hold a value. Returns the page "
             + "URL; nothing is collected back. Always show the user the URL in case the browser "
@@ -143,10 +144,10 @@ final class CeeTools
     Map<String, Object> properties = new LinkedHashMap<>();
     properties.put("template", templateProperty());
     properties.put("instance", Map.of("type", "string", "description",
-        "Optional instance to pre-fill the form with, as canonical CEDAR JSON-LD. Must be a "
-            + "complete CEDAR JSON instance (every template field present) for the editor to "
-            + "render it — cedar-artifact-mcp's instance_to_json given the template produces "
-            + "exactly that form. Omit to start from an empty form."));
+        "Optional instance to pre-fill the form with, as YAML or canonical CEDAR JSON-LD. Must be "
+            + "a complete instance (every template field present) for the editor to render it — "
+            + "cedar-artifact-mcp's instance_artifact_to_json, given the schema, produces exactly "
+            + "that. Omit to start from an empty form."));
     properties.put("timeout_seconds", Map.of("type", "integer", "description",
         "How long this call waits for the user to press Done before returning control to the "
             + "conversation (default " + DEFAULT_FILL_TIMEOUT_SECONDS + ", max "
@@ -165,8 +166,7 @@ final class CeeTools
             + "session id — the form stays open indefinitely and nothing the user typed is lost; "
             + "call collect_instance with that id once the user says they are done. Tell the "
             + "user a form has been opened and that they should press Done when finished. Takes "
-            + "the template as canonical CEDAR JSON (convert YAML first with cedar-artifact-mcp's "
-            + "template_to_json).")
+            + "the template as YAML (the compact exchange form) or canonical CEDAR JSON.")
         .inputSchema(schema(properties, List.of("template")))
         .build();
 
@@ -299,28 +299,22 @@ final class CeeTools
   private static String instanceResultText(Session session, ObjectNode submitted)
   {
     return "The user submitted the form (session " + session.id + "). Populated instance, as "
-        + "JSON-LD exactly as the editor produced it (cedar-artifact-mcp's instance_to_yaml "
-        + "converts it to compact YAML if desired):\n\n" + Json.pretty(submitted);
+        + "JSON-LD exactly as the editor produced it (cedar-artifact-mcp's "
+        + "instance_artifact_to_yaml converts it to compact YAML if desired):\n\n" + Json.pretty(submitted);
   }
 
   private static Map<String, Object> templateProperty()
   {
     return Map.of("type", "string", "description",
-        "The CEDAR template, as canonical CEDAR JSON (the JSON Schema form the CEE renders), "
-            + "passed through untouched. This server does no format conversion; convert YAML "
-            + "first with cedar-artifact-mcp's template_to_json.");
+        "The CEDAR template, as YAML (the compact exchange form) or canonical CEDAR JSON (the "
+            + "JSON Schema form the CEE renders).");
   }
 
-  /** Parse a required artifact argument as a JSON object, redirecting YAML input to the MCP that
-   *  owns format conversion instead of failing with a raw parse error. */
+  /** Parse a required artifact argument — YAML or canonical CEDAR JSON — into the canonical JSON
+   *  object the CEE renders (YAML is converted via cedar-artifact-library). */
   private static ObjectNode artifactJson(Map<String, Object> args, String key)
   {
-    String text = required(args, key);
-    if (!Json.looksLikeJson(text))
-      throw new IllegalArgumentException(key + " must be canonical CEDAR JSON — this server "
-          + "passes artifacts to the CEE untouched and does no format conversion; convert YAML "
-          + "first with cedar-artifact-mcp (template_to_json / instance_to_json)");
-    return Json.asObject(text);
+    return Json.toObject(required(args, key));
   }
 
   private static Map<String, Object> languageProperty()

@@ -82,11 +82,17 @@ final class CeeMcpTest
         "artifact JSON must reach the page byte-for-byte (no conversion, no additions)");
   }
 
-  @Test void yaml_input_is_redirected_to_the_artifact_mcp()
+  @Test void yaml_input_is_converted_to_canonical_json() throws Exception
   {
     McpSchema.CallToolResult result = call("show_template", Map.of("template", TEMPLATE_YAML));
-    assertTrue(result.isError());
-    assertTrue(text(result).contains("cedar-artifact-mcp"), text(result));
+    assertTrue(!result.isError(), text(result));
+
+    Session session = sessions.all().get(0);
+    HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
+    ObjectNode served = (ObjectNode) JACKSON.readTree(data.body()).get("templateObject");
+    assertEquals("https://schema.metadatacenter.org/core/Template", served.get("@type").asText(),
+        "YAML must be converted to canonical CEDAR JSON before reaching the page");
+    assertEquals("Patient Study", served.get("schema:name").asText());
   }
 
   // ---------------------------------------------------------------- web server
