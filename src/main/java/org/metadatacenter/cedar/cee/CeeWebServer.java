@@ -170,8 +170,11 @@ final class CeeWebServer
   /**
    * The CEE configuration per session. Read-only modes set {@code readOnlyMode}; the fill mode
    * leaves the editor live and points ontology autocomplete at the CEDAR terminology proxy. The
-   * sample-template loader and every developer/debug panel are pinned off — sessions inject their
-   * artifacts directly and the page is for end users. {@code hideEmptyFields} (CEE honors it in
+   * instance-data panels (core and full) and the template-source-data panel are shown beneath the
+   * form, so the JSON-LD instance and the template's JSON Schema are visible; the sample-template
+   * loader, header/footer chrome, preferences menu, and the remaining debug panels (rendering
+   * representation, multi-instance info, data-quality report) stay off. {@code hideEmptyFields}
+   * (CEE honors it in
    * read-only mode only) follows the session's flag — a caller display preference on instance
    * views, always off for bare-template views where every field is empty and hiding would blank
    * the page. The UI language follows the session's, falling back to English for untranslated
@@ -183,9 +186,9 @@ final class CeeWebServer
     config.put("showSampleTemplateLinks", false);
     config.put("showTemplateRenderingRepresentation", false);
     config.put("showMultiInstanceInfo", false);
-    config.put("showInstanceDataCore", false);
-    config.put("showInstanceDataFull", false);
-    config.put("showTemplateSourceData", false);
+    config.put("showInstanceDataCore", true);
+    config.put("showInstanceDataFull", true);
+    config.put("showTemplateSourceData", true);
     config.put("showDataQualityReport", false);
     config.put("showHeader", false);
     config.put("showFooter", false);
