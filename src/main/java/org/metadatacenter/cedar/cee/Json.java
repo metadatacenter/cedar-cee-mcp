@@ -17,12 +17,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Parse/serialize helpers for artifacts crossing into the CEE. The CEE consumes canonical CEDAR
- * JSON, so an artifact ends up as JSON before it is rendered — but a caller may supply it as the
- * compact YAML exchange form (canonical JSON is large enough that handing it to an LLM is
- * impractical), so {@link #toObject} accepts either: YAML is read into the artifact model with
- * {@code cedar-artifact-library} and rendered to canonical JSON. The populated instance still
- * comes back from the CEE as JSON-LD, exactly as the editor produced it.
+ * Parse/serialize helpers for artifacts crossing into the CEE. The CEE consumes CEDAR JSON, so an
+ * artifact ends up as JSON before it is rendered — but a caller should supply it as the compact
+ * YAML exchange form (the JSON is large enough that handing it to an LLM is impractical), so
+ * {@link #toObject} accepts either: YAML is read into the artifact model with
+ * {@code cedar-artifact-library} and rendered to JSON. The populated instance still comes back
+ * from the CEE as JSON-LD, exactly as the editor produced it.
  */
 final class Json
 {
@@ -34,7 +34,7 @@ final class Json
   private Json() {}
 
   /**
-   * Parse an artifact — JSON or YAML — into a canonical CEDAR JSON {@code ObjectNode}. JSON is
+   * Parse an artifact — YAML or JSON — into a CEDAR JSON {@code ObjectNode}. JSON is
    * parsed as-is; YAML is read into the artifact model and re-rendered to JSON, with the kind
    * taken from the YAML {@code type:} discriminator (anything that isn't template / element /
    * instance / element-instance is a field kind).
