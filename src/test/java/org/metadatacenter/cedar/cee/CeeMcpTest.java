@@ -91,7 +91,7 @@ final class CeeMcpTest
     HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
     ObjectNode served = (ObjectNode) JACKSON.readTree(data.body()).get("templateObject");
     assertEquals("https://schema.metadatacenter.org/core/Template", served.get("@type").asText(),
-        "YAML must be converted to canonical CEDAR JSON before reaching the page");
+        "YAML must be converted to CEDAR JSON before reaching the page");
     assertEquals("Patient Study", served.get("schema:name").asText());
   }
 

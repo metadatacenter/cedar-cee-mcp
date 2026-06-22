@@ -42,11 +42,11 @@ always returns the latest.
 
 ## Principle 5 — JSON in, JSON out; artifact translation lives elsewhere
 
-The CEE natively consumes canonical CEDAR JSON (JSON Schema templates, JSON-LD instances) and
+The CEE natively consumes CEDAR JSON (JSON Schema templates, JSON-LD instances) and
 produces JSON-LD. This server hands that JSON through **byte-for-byte in both directions** and
 never parses, converts, validates, or otherwise interprets artifact content — it deliberately has
 no dependency on `cedar-artifact-library`. YAML ↔ JSON translation is `cedar-artifact-mcp`'s job
-(`template_to_json`, `instance_to_json`, `instance_to_yaml`); YAML handed to a tool here is
+(`schema_artifact_to_json`, `instance_artifact_to_json`, `instance_artifact_to_yaml`); YAML handed to a tool here is
 rejected with a redirect to those tools, not converted. If a conversion concern ever seems to
 belong here, it belongs there.
 
@@ -66,7 +66,7 @@ the human sees what went wrong without opening a console.
 ## Note — pre-filling needs a complete instance
 
 The CEE lives in CEDAR's all-fields-present JSON world. Pre-filling `fill_instance` with a sparse
-instance will not render; `cedar-artifact-mcp`'s `instance_to_json`, given the template, produces
+instance will not render; `cedar-artifact-mcp`'s `instance_artifact_to_json`, given the template, produces
 exactly the complete JSON-LD form the editor needs.
 
 ## Note — what the terminology URL buys

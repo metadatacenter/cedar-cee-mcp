@@ -10,7 +10,7 @@ several items below are deliberate cuts, not oversights.
   (or confirm which font face the pinned CEE version expects) so the chrome looks right.
 
 - **Pre-fill ergonomics.** `fill_instance` with an existing instance requires the complete CEDAR
-  JSON-LD form, which `cedar-artifact-mcp`'s `instance_to_json` produces given the template. If
+  JSON-LD form, which `cedar-artifact-mcp`'s `instance_artifact_to_json` produces given the template. If
   that hand-off proves awkward in practice, revisit the flow — but artifact manipulation stays out
   of this server (DESIGN.md Principle 5), so any fix belongs on the artifact-mcp side.
 

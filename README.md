@@ -52,7 +52,7 @@ and opens it in your browser; nothing is deployed, hosted, or shared (mechanics 
 ## Example workflow
 
 Natural-language prompts the user gives the LLM, and what happens. This server speaks the CEE's
-native form — canonical CEDAR JSON — and passes it through untouched in both directions; the
+native form — CEDAR JSON — and passes it through untouched in both directions; the
 artifact translation in this walkthrough (YAML shown for readability) is `cedar-artifact-mcp`'s
 work, not this server's.
 
@@ -72,7 +72,7 @@ children:
     datatype: xsd:int
 ```
 
-and exported it to the canonical JSON form with `template_to_json` — which is what gets passed to
+and exported it to the JSON form with `schema_artifact_to_json` — which is what gets passed to
 the tools below.
 
 *Show me this template.*
@@ -86,7 +86,7 @@ tab didn't open); nothing is collected back.
 `fill_instance` opens an **editable** form and waits. The user types values — controlled-term
 fields autocomplete against BioPortal via the CEDAR terminology service — and presses the form's
 **Done** button. The tool call returns with the populated instance as **JSON-LD, exactly as the
-editor produced it**. Rendered as compact YAML by `cedar-artifact-mcp`'s `instance_to_yaml`, the
+editor produced it**. Rendered as compact YAML by `cedar-artifact-mcp`'s `instance_artifact_to_yaml`, the
 instance reads:
 
 ```yaml
@@ -138,14 +138,14 @@ ba242ba9-1c3b-4491-950c-c8d7f4291e04  FILL  http://127.0.0.1:52144/s/ba242ba9-1c
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
 
-The `template` and `instance` arguments are canonical CEDAR JSON — the JSON Schema and JSON-LD
+The `template` and `instance` arguments are CEDAR JSON — the JSON Schema and JSON-LD
 forms the CEE natively consumes — and pass through byte-for-byte. This server does no format
 conversion and never interprets artifact content. To work in YAML, translate with
-`cedar-artifact-mcp`: `template_to_json` and `instance_to_json` on the way in, and
-`instance_to_yaml` for a returned instance if desired.
+`cedar-artifact-mcp`: `schema_artifact_to_json` and `instance_artifact_to_json` on the way in, and
+`instance_artifact_to_yaml` for a returned instance if desired.
 
 Pre-filling `fill_instance` with an existing instance requires a complete CEDAR JSON instance —
-the all-fields-present form the editor expects. `cedar-artifact-mcp`'s `instance_to_json`, given
+the all-fields-present form the editor expects. `cedar-artifact-mcp`'s `instance_artifact_to_json`, given
 the template, produces exactly that form.
 
 The optional `language` argument sets the editor's UI language as an ISO code (for example,

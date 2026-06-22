@@ -11,7 +11,7 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
 - **Comments describe code-level facts only.** No PR numbers, session context, or anything that
   needs the authoring context to make sense.
 - **This server does not interpret artifacts.** No parsing, conversion, or validation of artifact
-  content — canonical CEDAR JSON in, JSON-LD out, byte-for-byte, and deliberately **no dependency
+  content — CEDAR JSON in, JSON-LD out, byte-for-byte, and deliberately **no dependency
   on `cedar-artifact-library`**. YAML ↔ JSON translation belongs to `cedar-artifact-mcp`; if a
   conversion concern appears here, it belongs there.
 - **Tests must pass with no skips.** Two tiers: `mvn test` runs the in-process unit tests (no
