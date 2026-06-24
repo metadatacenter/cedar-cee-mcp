@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * out and the CEE bundle is never fetched (these tests cover everything up to the component
  * boundary; rendering inside a real browser is the manual smoke test in the README).
  *
- * <p>Artifacts are arbitrary JSON here: this server passes artifact JSON through byte-for-byte
+ * <p>Artifacts are arbitrary JSON here — this server passes artifact JSON through byte-for-byte
  * and never interprets it, so the fixtures only need to be JSON objects, not valid CEDAR.
  */
 final class CeeMcpTest

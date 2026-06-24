@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * and classpath problems, resources missing from the jar (the host page), stdio framing, and tool
  * registration.
  *
- * <p>No browser opens during the run: the subprocess is started with a {@code PATH} containing
+ * <p>No browser opens during the run — the subprocess is started with a {@code PATH} containing
  * only no-op {@code open} / {@code xdg-open} shims, which is the environment the JVM's
  * {@code ProcessBuilder} resolves those commands against.
  */

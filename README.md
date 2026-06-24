@@ -44,7 +44,7 @@ supplies the **ontology terms** they bind to,
 [`cedar-artifact-rest-mcp`](https://github.com/metadatacenter/cedar-artifact-rest-mcp) **persists** them to a CEDAR
 server — and this one is where a person **sees and completes** them.
 
-Everything runs on your own machine: each tool serves a private page from the MCP server itself
+Everything runs on your own machine — each tool serves a private page from the MCP server itself
 and opens it in your browser; nothing is deployed, hosted, or shared (mechanics in
 [How it works](#how-it-works) below). See [DESIGN.md](./DESIGN.md) for the principles and
 [ROADMAP.md](./ROADMAP.md) for deferred work.
