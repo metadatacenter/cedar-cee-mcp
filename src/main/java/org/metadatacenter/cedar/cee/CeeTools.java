@@ -152,7 +152,7 @@ final class CeeTools
     properties.put("timeout_seconds", Map.of("type", "integer", "description",
         "How long this call waits for the user to press Done before returning control to the "
             + "conversation (default " + DEFAULT_FILL_TIMEOUT_SECONDS + ", max "
-            + MAX_FILL_TIMEOUT_SECONDS + "). Not a deadline on the user: the form stays open "
+            + MAX_FILL_TIMEOUT_SECONDS + "). Not a deadline on the user — the form stays open "
             + "indefinitely; collect the result later with collect_instance."));
     properties.put("language", languageProperty());
 

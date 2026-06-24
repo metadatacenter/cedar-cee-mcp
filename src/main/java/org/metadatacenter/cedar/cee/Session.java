@@ -47,7 +47,7 @@ final class Session
     this.language = language;
   }
 
-  /** Record the instance the user submitted from the browser. Later submissions win: the user may
+  /** Record the instance the user submitted from the browser. Later submissions win — the user may
    *  click Done, notice a mistake, fix it, and click Done again before collecting. */
   void submit(ObjectNode instance)
   {

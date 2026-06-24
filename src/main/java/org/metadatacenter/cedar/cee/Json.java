@@ -20,7 +20,7 @@ import java.util.Map;
  * Parse/serialize helpers for artifacts crossing into the CEE. The CEE consumes CEDAR JSON, so an
  * artifact ends up as JSON before it is rendered — but a caller should supply it as the compact
  * YAML exchange form (the JSON is large enough that handing it to an LLM is impractical), so
- * {@link #toObject} accepts either: YAML is read into the artifact model with
+ * {@link #toObject} accepts either — YAML is read into the artifact model with
  * {@code cedar-artifact-library} and rendered to JSON. The populated instance still comes back
  * from the CEE as JSON-LD, exactly as the editor produced it.
  */

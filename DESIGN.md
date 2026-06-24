@@ -25,7 +25,7 @@ persistence, non-loopback binds) is out of scope — see ROADMAP.md.
 
 The CEE is consumed as the single self-contained web-component bundle its npm package publishes
 (`cedar-embeddable-editor.min.js`), pinned by version and loaded from the CDN. There is no
-frontend build step, no npm, no Angular toolchain in this repo — and no configuration: the
+frontend build step, no npm, no Angular toolchain in this repo — and no configuration. The
 server's only knobs are the version string in the host page and constants in the code. The host page is hand-written static HTML small enough to read in
 one sitting. Upgrading the CEE means changing one version string in the host page after a manual
 browser check.
@@ -60,7 +60,7 @@ just spent minutes typing.
 
 Tool failures (unreadable artifact, unknown session, read-only session) come back as
 `isError=true` results with a message the LLM can act on — not protocol errors. The web surface
-mirrors this: the host page surfaces bundle-load and submit failures as visible page status, so
+mirrors this — the host page surfaces bundle-load and submit failures as visible page status, so
 the human sees what went wrong without opening a console.
 
 ## Note — pre-filling needs a complete instance
