@@ -15,9 +15,9 @@
     MCP server that displays CEDAR templates and instances in a browser via the CEDAR
     Embeddable Editor (CEE), and collects user-populated instances back into the
     conversation. The form-presentation counterpart to cedar-artifact-mcp (authoring)
-    and cedar-artifact-rest-mcp (persistence): it serves a localhost page hosting the CEE web
+    and cedar-artifact-rest-mcp (persistence). It serves a localhost page hosting the CEE web
     component, opens a browser tab, and returns the completed JSON-LD instance. Artifacts may be
-    supplied as YAML or canonical CEDAR JSON; YAML is converted to JSON via cedar-artifact-library
+    supplied as YAML or CEDAR JSON; YAML is converted to JSON via cedar-artifact-library
     before it reaches the CEE, so an LLM can hand over the compact form rather than the large JSON.
   </description>
 
