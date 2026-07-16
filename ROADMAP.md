@@ -21,6 +21,17 @@ several items below are deliberate cuts, not oversights.
   artifacts and pin all three Java MCPs to a released version. See `cedar-artifact-mcp`'s ROADMAP
   for the full note.
 
+- **The library dependency here is CEE-driven, not server-driven — the CEDAR server going
+  YAML-native does NOT free cee-mcp of `cedar-artifact-library`.** This is a subtle point and it
+  keeps getting lost, so it is spelled out here deliberately. cee-mcp pulls in the library to
+  convert the caller's YAML into JSON for the **CEE web component** (`cedar-embeddable-editor`),
+  which consumes JSON-LD internally. That is a *different target* from `cedar-artifact-rest-mcp`,
+  whose conversion feeds the **CEDAR server**. So the rest-mcp "YAML straight through" plan — which
+  lets rest-mcp drop the library once the *server* accepts YAML — has no equivalent here. cee-mcp
+  can shed `cedar-artifact-library` only if the **CEE component itself** accepts YAML, an upstream
+  change outside this project that is not on the horizon. Whatever the CEDAR server does about
+  YAML, cee-mcp keeps this dependency. Do not assume the rest-mcp YAML work generalizes to cee-mcp.
+
 ## Later / maybe
 
 - **Kiosk mode.** One persistent browser tab that receives successive show/fill calls (SSE or
