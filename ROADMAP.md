@@ -10,9 +10,16 @@ several items below are deliberate cuts, not oversights.
   (or confirm which font face the pinned CEE version expects) so the chrome looks right.
 
 - **Pre-fill ergonomics.** `fill_instance` with an existing instance requires the complete CEDAR
-  JSON-LD form, which `cedar-artifact-mcp`'s `instance_artifact_to_json` produces given the template. If
+  JSON-LD form, which `cedar-artifact-mcp`'s `render_instance_artifact` (format: json) produces given the template. If
   that hand-off proves awkward in practice, revisit the flow — but artifact manipulation stays out
   of this server (DESIGN.md Principle 5), so any fix belongs on the artifact-mcp side.
+
+- **Build without a locally installed library.** Like the sibling Java MCPs, this server pins
+  `cedar-artifact-library:2.8.4-SNAPSHOT`, which must be `mvn install`ed from a local checkout
+  (together with `cedar-parent` and the `cedar-model-*` libraries), so it no longer resolves
+  purely from Maven Central. The fix is on the library side — publish released, non-SNAPSHOT
+  artifacts and pin all three Java MCPs to a released version. See `cedar-artifact-mcp`'s ROADMAP
+  for the full note.
 
 ## Later / maybe
 
