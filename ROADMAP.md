@@ -43,11 +43,6 @@ several items below are deliberate cuts, not oversights.
   story accommodates a 2.7 MB component bundle that needs network access to the terminology
   service. The localhost-tab approach works in every client today, including terminal ones.
 
-- **`cedar-artifact-viewer` (CAV) for read-only display.** A dedicated viewer component exists
-  (npm `cedar-artifact-viewer`, currently 0.9.x). Using the CEE's `readOnlyMode` for both
-  display modes keeps one component and one spike; switch the `show_*` tools to CAV if its
-  rendering proves better for inspection.
-
 - **Offline use.** The CEE bundle is loaded from the CDN; an offline environment has no fallback.
   If that need materializes, vendor the bundle into the jar's resources and serve it locally —
   a fatter artifact and a manual step per CEE upgrade.
