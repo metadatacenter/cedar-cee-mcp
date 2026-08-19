@@ -24,11 +24,20 @@ persistence, non-loopback binds) is out of scope — see ROADMAP.md.
 ## Principle 3 — The CEE is a prebuilt, pinned dependency
 
 The CEE is consumed as the single self-contained web-component bundle its npm package publishes
-(`cedar-embeddable-editor.min.js`), pinned by version and loaded from the CDN. There is no
-frontend build step, no npm, no Angular toolchain in this repo — and no configuration. The
-server's only knobs are the version string in the host page and constants in the code. The host page is hand-written static HTML small enough to read in
-one sitting. Upgrading the CEE means changing one version string in the host page after a manual
-browser check.
+(`cedar-embeddable-editor.js`), pinned by version and served by this server out of its own jar.
+There is no frontend build step, no npm, no Angular toolchain in this repo. The build fetches the
+package from the BMIR Nexus, where the CEE publishes under the `@org.metadatacenter` scope, and
+verifies the bundle against the hash the pin names — a dev version label can be republished, so the
+version alone does not identify the bytes.
+
+Serving it locally is not a preference. No public CDN carries a package published to a private
+registry, so there is nothing for the page to link to. It also means a session needs no network but
+the terminology and bridge servers the fields themselves call.
+
+Upgrading the CEE is two lines in the pom — version and hash — plus a browser check, and the
+configuration the host page sends has to be checked against the release's own surface: CEE reads a
+fixed set of keys and ignores the rest, reporting them to a console a host does not watch. The unit
+suite asserts every key this server sends is one CEE reads.
 
 ## Principle 4 — The return path is a tool result, blocking with an escape hatch
 

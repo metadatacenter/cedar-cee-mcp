@@ -132,7 +132,7 @@ ba242ba9-1c3b-4491-950c-c8d7f4291e04  FILL  http://127.0.0.1:52144/s/ba242ba9-1c
 | Tool | What it does |
 |---|---|
 | `show_template(template, language?)` | Presents a read-only rendering of a template, so a person can review the metadata standard as the form it will become. Structure, fields, and constraints render exactly as they would for data entry, with inputs disabled. Nothing is collected back; the tool returns the page URL. |
-| `show_instance(template, instance, hide_empty_fields?, language?)` | Presents a read-only rendering of a populated instance against its template. The full template structure shows by default, with unpopulated fields blank; pass `hide_empty_fields: true` to show only fields that hold a value. |
+| `show_instance(template, instance, language?)` | Presents a read-only rendering of a populated instance against its template. The full template structure shows, with unpopulated fields blank. |
 | `fill_instance(template, instance?, timeout_seconds?, language?)` | Presents an editable form for populating an instance of the template. Waits up to `timeout_seconds` (default 120) for the user to press **Done** and returns the populated instance (JSON-LD, exactly as the editor produced it). If the user is still working, the call returns control to the conversation — the form stays open indefinitely, and `collect_instance` retrieves the result whenever the user finishes. Nothing expires. |
 | `collect_instance(session_id)` | Fetches the submitted instance after the fact — the non-blocking half of fill. Latest Done press wins. |
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
@@ -155,7 +155,8 @@ The optional `language` argument sets the editor's UI language as an ISO code (f
 
 An MCP server is a headless process — it has no screen of its own. To show a form, this server
 runs a tiny web server on your machine (bound to `127.0.0.1` on a random port) serving one static
-page per session. That page loads the CEE web component from the CDN (pinned version), renders
+page per session. That page loads the CEE web component from this same server (pinned version,
+served out of the jar), renders
 the session's template or instance, and — in editable mode — sends what the user entered back to
 the server when they press **Done**, where the waiting `fill_instance` (or a later
 `collect_instance`) picks it up. Controlled-term autocomplete talks to CEDAR's public terminology
@@ -180,14 +181,17 @@ editing the config.
 ## Requirements
 
 - Java 17+, Maven 3.9+ (all dependencies are on Maven Central — no local library builds needed)
-- A browser, and network access to the CDN and — for controlled-term autocomplete — the CEDAR
-  terminology service.
+- A browser. The CEE bundle is served locally, so the only network the form needs is CEDAR's
+  terminology service for controlled-term autocomplete and its bridge service for the
+  external-authority fields (ORCID, ROR, DOI, PubMed, RRID, NIH grant, PFAS).
+- The build fetches the CEE package from the BMIR Nexus once per pinned version; reads are
+  anonymous, and a rebuild afterwards needs no network.
 
 ## Build
 
 ```bash
 mvn package        # builds target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar (shaded, executable)
-mvn test           # unit tests — in-process, no browser, no CDN
+mvn test           # unit tests — in-process, no browser
 mvn verify         # + the end-to-end IT: spawns the shaded jar, speaks real JSON-RPC over
                    #   stdio, and exercises the session web server over HTTP. No browser opens —
                    #   the subprocess gets a PATH containing only no-op open/xdg-open shims.
@@ -210,9 +214,11 @@ You should see the capabilities, six tools, and `pong: hello`. `Ctrl-C` to exit.
 
 Browser-level (the part unit tests can't cover): call `show_template` from an MCP client with any
 template and confirm the form renders read-only in the opened tab; then `fill_instance`, type a
-value, press **Done**, and confirm the instance comes back. This end-to-end loop — CDN bundle
-load, read-only rendering, editable rendering, typed value landing in `currentMetadata`, Done →
-submit → returned instance — has been verified against CEE 1.5.0.
+value, press **Done**, and confirm the instance comes back. This end-to-end loop — bundle load,
+read-only rendering, editable rendering, a controlled term resolved against the terminology
+service, Done → submit → returned instance — has been verified against CEE
+`2.0.0-dev.20260818.6dca9bf`. Watch the browser console while you do: CEE reports a configuration
+key it does not read, and that is how a stale key is found.
 
 ## License
 

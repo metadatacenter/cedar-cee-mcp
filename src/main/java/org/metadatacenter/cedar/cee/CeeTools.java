@@ -90,7 +90,7 @@ final class CeeTools
         return error("could not read the template: " + e.getMessage());
       }
       Session session = sessions.create(Session.Mode.VIEW_TEMPLATE, templateJson, null,
-          false, languageArg(args));
+          languageArg(args));
       return opened(session, "read-only template view");
     });
   }
@@ -104,9 +104,6 @@ final class CeeTools
     properties.put("instance", Map.of("type", "string", "description",
         "The CEDAR template instance to display, as YAML (the compact exchange form); CEDAR "
             + "JSON-LD is also accepted."));
-    properties.put("hide_empty_fields", Map.of("type", "boolean", "description",
-        "Omit template fields the instance has no value for, showing only the populated ones. "
-            + "Defaults to false: the full template structure shows, with empty fields blank."));
     properties.put("language", languageProperty());
 
     McpSchema.Tool tool = McpSchema.Tool.builder()
@@ -114,11 +111,10 @@ final class CeeTools
         .title("Display a populated CEDAR instance in the browser (read-only)")
         .description("Renders a CEDAR template instance against its template as a read-only form "
             + "in the user's browser via the CEDAR Embeddable Editor. Takes both artifacts as "
-            + "YAML (the compact exchange form); CEDAR JSON is also accepted. By default the "
-            + "full template structure shows, with unpopulated fields blank; pass "
-            + "hide_empty_fields:true to show only fields that hold a value. Returns the page "
-            + "URL; nothing is collected back. Always show the user the URL in case the browser "
-            + "tab did not open automatically.")
+            + "YAML (the compact exchange form); CEDAR JSON is also accepted. The full template "
+            + "structure shows, with unpopulated fields blank. Returns the page URL; nothing is "
+            + "collected back. Always show the user the URL in case the browser tab did not open "
+            + "automatically.")
         .inputSchema(schema(properties, List.of("template", "instance")))
         .build();
 
@@ -133,7 +129,7 @@ final class CeeTools
         return error("could not read the artifacts: " + e.getMessage());
       }
       Session session = sessions.create(Session.Mode.VIEW_INSTANCE, templateJson, instanceJson,
-          boolArg(args, "hide_empty_fields", false), languageArg(args));
+          languageArg(args));
       return opened(session, "read-only instance view");
     });
   }
@@ -185,7 +181,7 @@ final class CeeTools
       }
 
       Session session = sessions.create(Session.Mode.FILL, templateJson, instanceJson,
-          false, languageArg(args));
+          languageArg(args));
       String url = web.sessionUrl(session);
       boolean openedInBrowser = browser.open(url);
 
@@ -355,15 +351,6 @@ final class CeeTools
     return value;
   }
 
-  private static boolean boolArg(Map<String, Object> args, String key, boolean defaultValue)
-  {
-    Object raw = args.get(key);
-    if (raw == null)
-      return defaultValue;
-    if (raw instanceof Boolean bool)
-      return bool;
-    return Boolean.parseBoolean(raw.toString().trim());
-  }
 
   private static int intArg(Map<String, Object> args, String key, int defaultValue)
   {

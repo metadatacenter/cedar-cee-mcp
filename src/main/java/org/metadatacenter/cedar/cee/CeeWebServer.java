@@ -19,9 +19,15 @@ import java.util.concurrent.Executors;
  * one static host page that loads the CEE web-component bundle and drives it with per-session
  * data.
  *
+ * <p>The bundle is served from here too, out of the jar. It is published to the BMIR Nexus under
+ * the {@code @org.metadatacenter} scope rather than to npmjs, so no public CDN carries it and the
+ * page has nothing to link to; the build fetches the package and stages the bundle as a resource.
+ * A session therefore needs no network beyond the terminology proxy the autocomplete calls.
+ *
  * <p>Routes:
  * <ul>
  *   <li>{@code GET /s/{id}} — the host page (same page for every mode; it fetches its data);</li>
+ *   <li>{@code GET /cee/cedar-embeddable-editor.js} — the CEE bundle, shared by every session;</li>
  *   <li>{@code GET /s/{id}/data} — the session's mode, CEE config, template, and optional
  *       instance as one JSON object;</li>
  *   <li>{@code POST /s/{id}/submit} — the populated JSON-LD instance from the browser's Done
@@ -34,9 +40,24 @@ import java.util.concurrent.Executors;
  */
 final class CeeWebServer
 {
-  /** CEDAR's public terminology proxy, backing the CEE's controlled-term autocomplete. */
-  static final String TERMINOLOGY_URL =
-      "https://terminology.metadatacenter.org/bioportal/integrated-search";
+  /** Where the host page loads the CEE bundle from; served by {@link #route} out of the jar. */
+  static final String CEE_BUNDLE_PATH = "/cee/cedar-embeddable-editor.js";
+
+  private static final String CEE_BUNDLE_RESOURCE = "/web/cedar-embeddable-editor.js";
+
+  /**
+   * CEDAR's public terminology server, backing the CEE's controlled-term autocomplete. A base URL,
+   * not an endpoint: CEE appends the integrated-search route itself, and refuses a base that does
+   * not end in a slash.
+   */
+  static final String TERMINOLOGY_BASE_URL = "https://terminology.metadatacenter.org/";
+
+  /**
+   * CEDAR's public bridge server, which resolves the external-authority fields — ORCID, ROR, DOI,
+   * PubMed, RRID, NIH grant, PFAS. A base URL on the same terms as the terminology one: unset,
+   * those fields offer nothing and CEE names the key it wanted.
+   */
+  static final String BRIDGE_BASE_URL = "https://bridge.metadatacenter.org/";
 
   private static final ObjectMapper JACKSON = new ObjectMapper();
 
@@ -96,6 +117,9 @@ final class CeeWebServer
 
       if ("GET".equals(method) && "/health".equals(path)) {
         respond(exchange, 200, "text/plain", "ok".getBytes(StandardCharsets.UTF_8));
+      } else if ("GET".equals(method) && CEE_BUNDLE_PATH.equals(path)) {
+        // Not session-scoped: one bundle serves every session, and the browser caches it once.
+        respond(exchange, 200, "text/javascript; charset=utf-8", resource(CEE_BUNDLE_RESOURCE));
       } else if (path.startsWith("/s/")) {
         routeSession(exchange, method, path);
       } else {
@@ -168,46 +192,49 @@ final class CeeWebServer
   }
 
   /**
-   * The CEE configuration per session. Read-only modes set {@code readOnlyMode}; the fill mode
-   * leaves the editor live and points ontology autocomplete at the CEDAR terminology proxy. The
-   * instance-data panels (core and full) and the template-source-data panel are shown beneath the
-   * form, so the JSON-LD instance and the template's JSON Schema are visible; the sample-template
-   * loader, header/footer chrome, preferences menu, and the remaining debug panels (rendering
-   * representation, multi-instance info, data-quality report) stay off. {@code hideEmptyFields}
-   * (CEE honors it in
-   * read-only mode only) follows the session's flag — a caller display preference on instance
-   * views, always off for bare-template views where every field is empty and hiding would blank
-   * the page. The UI language follows the session's, falling back to English for untranslated
+   * The CEE configuration per session. A read-only mode sets {@code readOnlyMode}; the fill mode
+   * leaves the editor live. Controlled-term autocomplete is pointed at CEDAR's terminology server
+   * and the external-authority fields at its bridge server, so a template using either kind works
+   * without the caller configuring anything. The download menu is on, so a viewer can take the
+   * artifact away as JSON-LD, JSON Schema or YAML — the panels that used to print those beneath the
+   * form are gone. The UI language follows the session's, falling back to English for untranslated
    * strings.
+   *
+   * <p>CEE reads these nine keys and no others, and says so in the browser console when it is handed
+   * something else. Its configuration surface narrowed sharply in 2.0: the panels this MCP used to
+   * switch on — instance data, template source, rendering representation, multi-instance info, the
+   * data-quality report — and the header, footer and sample-template chrome it switched off are all
+   * gone, along with {@code hideEmptyFields}. Sending them would cost nothing but a console full of
+   * complaints about keys that have no effect.
    */
   private ObjectNode ceeConfig(Session session)
   {
     ObjectNode config = JACKSON.createObjectNode();
-    config.put("showSampleTemplateLinks", false);
-    config.put("showTemplateRenderingRepresentation", false);
-    config.put("showMultiInstanceInfo", false);
-    config.put("showInstanceDataCore", true);
-    config.put("showInstanceDataFull", true);
-    config.put("showTemplateSourceData", true);
-    config.put("showDataQualityReport", false);
-    config.put("showHeader", false);
-    config.put("showFooter", false);
-    config.put("showPreferencesMenu", false);
+    config.put("showDownloadMenu", true);
     config.put("defaultLanguage", session.language);
     config.put("fallbackLanguage", "en");
-    config.put("terminologyIntegratedSearchUrl", TERMINOLOGY_URL);
-    if (session.mode != Session.Mode.FILL) {
+    config.put("terminologyBaseUrl", TERMINOLOGY_BASE_URL);
+    config.put("bridgeBaseUrl", BRIDGE_BASE_URL);
+    if (session.mode != Session.Mode.FILL)
       config.put("readOnlyMode", true);
-      config.put("hideEmptyFields", session.hideEmptyFields);
-    }
     return config;
   }
 
   private byte[] hostPage() throws IOException
   {
-    try (InputStream in = CeeWebServer.class.getResourceAsStream("/web/session.html")) {
+    return resource("/web/session.html");
+  }
+
+  /**
+   * A static resource from the jar. The CEE bundle is staged there by the build, so a jar that was
+   * assembled without it would fail here rather than in the browser, where the symptom would be a
+   * page that loads and then does nothing.
+   */
+  private static byte[] resource(String path) throws IOException
+  {
+    try (InputStream in = CeeWebServer.class.getResourceAsStream(path)) {
       if (in == null)
-        throw new IllegalStateException("host page resource /web/session.html missing from jar");
+        throw new IllegalStateException("resource " + path + " missing from jar");
       return in.readAllBytes();
     }
   }

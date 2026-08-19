@@ -34,8 +34,10 @@
 </div>
 
 <script>
-  // The CEE web-component bundle, pinned, loaded from the CDN.
-  const CEE_CDN = 'https://cdn.jsdelivr.net/npm/cedar-embeddable-editor@1.5.2/cedar-embeddable-editor.min.js';
+  // The CEE web-component bundle, served by cedar-cee-mcp out of its own jar. It is published to
+  // the BMIR Nexus rather than to npmjs, so there is no CDN to link to — and nothing here depends
+  // on the network reaching one.
+  const CEE_BUNDLE = '/cee/cedar-embeddable-editor.js';
 
   const sessionId = location.pathname.split('/')[2];
   const statusEl = document.getElementById('status');
@@ -66,10 +68,10 @@
     }
 
     try {
-      await loadScript(CEE_CDN);
-    } catch (cdnError) {
-      setStatus('Could not load the CEE bundle from the CDN. Check your network connection '
-        + 'and reload this page.', true);
+      await loadScript(CEE_BUNDLE);
+    } catch (bundleError) {
+      setStatus('Could not load the CEE bundle from cedar-cee-mcp. Reload this page; if it '
+        + 'persists the server was built without the bundle staged.', true);
       return;
     }
 
@@ -87,6 +89,20 @@
     document.getElementById('title').textContent = templateName;
 
     const cee = document.querySelector('cedar-embeddable-editor');
+
+    // Assigned before the configuration it concerns: CEE injects the handler when this input is
+    // set, so a handler set afterwards never hears what the configuration reported. Reports do
+    // not change what the editor does — an unknown key is ignored either way — so they are
+    // counted here and detailed in the console rather than replacing the mode's status line.
+    const problems = [];
+    cee.eventHandler = {
+      error: (label, value) => {
+        problems.push(label);
+        console.error('CEE: ' + label, value);
+      },
+      trace: (label, value) => console.debug('CEE: ' + label, value)
+    };
+
     cee.config = data.config;
     if (data.instanceObject) {
       cee.templateAndInstanceObject = {
@@ -97,14 +113,20 @@
       cee.templateObject = data.templateObject;
     }
 
+    let status;
     if (data.mode === 'FILL') {
       doneButton.hidden = false;
-      setStatus('Fill in the form, then press "Done" to send the metadata back to the chat.');
+      status = 'Fill in the form, then press "Done" to send the metadata back to the chat.';
     } else if (data.mode === 'VIEW_INSTANCE') {
-      setStatus('Read-only view of a metadata instance.');
+      status = 'Read-only view of a metadata instance.';
     } else {
-      setStatus('Read-only view of a template.');
+      status = 'Read-only view of a template.';
     }
+    if (problems.length) {
+      status += ' CEE reported ' + problems.length + ' problem'
+        + (problems.length === 1 ? '' : 's') + ' with what it was handed — see the browser console.';
+    }
+    setStatus(status, problems.length > 0);
   }
 
   doneButton.addEventListener('click', async () => {

@@ -43,9 +43,9 @@ several items below are deliberate cuts, not oversights.
   story accommodates a 2.7 MB component bundle that needs network access to the terminology
   service. The localhost-tab approach works in every client today, including terminal ones.
 
-- **Offline use.** The CEE bundle is loaded from the CDN; an offline environment has no fallback.
-  If that need materializes, vendor the bundle into the jar's resources and serve it locally —
-  a fatter artifact and a manual step per CEE upgrade.
+- **Offline use.** *Done.* The bundle is fetched at build time and served from the jar, which the
+  move to a Nexus-published CEE forced and which costs the artifact 2 MB. A session now reaches the
+  network only for the terminology and bridge services the fields themselves call.
 
 ## Out of scope
 

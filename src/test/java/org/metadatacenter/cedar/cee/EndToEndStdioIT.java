@@ -127,8 +127,16 @@ final class EndToEndStdioIT
     HttpResponse<String> page = get(url);
     assertEquals(200, page.statusCode());
     assertTrue(page.body().contains("<cedar-embeddable-editor>"), "host page carries the CEE tag");
-    assertTrue(page.body().contains("cdn.jsdelivr.net/npm/cedar-embeddable-editor@"),
-        "host page references the pinned CEE bundle");
+    assertTrue(page.body().contains(CeeWebServer.CEE_BUNDLE_PATH),
+        "host page loads the bundle from this server");
+
+    // The bundle itself: staged into the jar by the build, and served whole. A jar assembled
+    // without it would leave a page that loads and then does nothing.
+    String base = url.substring(0, url.indexOf("/s/"));
+    HttpResponse<String> bundle = get(base + CeeWebServer.CEE_BUNDLE_PATH);
+    assertEquals(200, bundle.statusCode(), "the CEE bundle is served from the jar");
+    assertTrue(bundle.body().length() > 1_000_000,
+        "the whole bundle is served, got " + bundle.body().length() + " bytes");
 
     HttpResponse<String> data = get(url + "/data");
     assertEquals(200, data.statusCode());
@@ -136,7 +144,6 @@ final class EndToEndStdioIT
     assertTrue(dataJson.at("/config/readOnlyMode").asBoolean());
     assertEquals("IT Template", dataJson.at("/templateObject/schema:name").asText());
 
-    String base = url.substring(0, url.indexOf("/s/"));
     assertEquals(200, get(base + "/health").statusCode());
   }
 

@@ -115,15 +115,40 @@ final class CeeMcpTest
     assertFalse(dataJson.has("instanceObject"));
   }
 
-  @Test void fill_session_data_is_editable_and_carries_terminology_url() throws Exception
+  /** The configuration surface CEE 2.0 declares, from its CONFIG_SCHEMA. */
+  private static final List<String> CEE_CONFIG_KEYS = List.of(
+      "showTemplateDescription", "readOnlyMode", "trustTemplateRichText", "showDownloadMenu",
+      "terminologyBaseUrl", "bridgeBaseUrl", "defaultLanguage", "fallbackLanguage",
+      "languageMapPathPrefix");
+
+  @Test void fill_session_data_is_editable_and_carries_the_terminology_base_url() throws Exception
   {
     Session session = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
 
     HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
     ObjectNode config = (ObjectNode) JACKSON.readTree(data.body()).get("config");
     assertFalse(config.has("readOnlyMode"), "fill mode leaves the editor live");
-    assertEquals(CeeWebServer.TERMINOLOGY_URL,
-        config.get("terminologyIntegratedSearchUrl").asText());
+    assertEquals(CeeWebServer.TERMINOLOGY_BASE_URL, config.get("terminologyBaseUrl").asText());
+    assertTrue(CeeWebServer.TERMINOLOGY_BASE_URL.endsWith("/"),
+        "CEE appends the search route to this and drops a base that does not end in a slash");
+  }
+
+  /**
+   * CEE reads nine configuration keys and reports anything else in the browser console, where a
+   * host does not see it. This is that check moved somewhere it fails a build instead.
+   */
+  @Test void every_configuration_key_is_one_cee_reads() throws Exception
+  {
+    Session viewing = sessions.create(Session.Mode.VIEW_TEMPLATE, Json.asObject(TEMPLATE_JSON), null);
+    Session filling = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
+
+    for (Session session : List.of(viewing, filling)) {
+      ObjectNode config = (ObjectNode) JACKSON.readTree(
+          get(web.sessionUrl(session) + "/data").body()).get("config");
+      config.fieldNames().forEachRemaining(key ->
+          assertTrue(CEE_CONFIG_KEYS.contains(key),
+              "CEE 2.0 does not read \"" + key + "\"; it would report the key and ignore it"));
+    }
   }
 
   @Test void unknown_session_is_404() throws Exception
@@ -187,23 +212,6 @@ final class CeeMcpTest
     assertTrue(text(result).contains("http://127.0.0.1:"), text(result));
   }
 
-  @Test void show_instance_shows_empty_fields_by_default_and_hides_on_request() throws Exception
-  {
-    call("show_instance", Map.of("template", TEMPLATE_JSON, "instance", INSTANCE_JSON));
-    call("show_instance", Map.of("template", TEMPLATE_JSON, "instance", INSTANCE_JSON,
-        "hide_empty_fields", true));
-
-    List<Session> created = sessions.all();
-    assertEquals(2, created.size());
-    for (Session session : created) {
-      HttpResponse<String> data = get(web.sessionUrl(session) + "/data");
-      ObjectNode config = (ObjectNode) JACKSON.readTree(data.body()).get("config");
-      assertEquals(session.hideEmptyFields, config.get("hideEmptyFields").asBoolean());
-    }
-    assertFalse(created.get(0).hideEmptyFields, "default is to show the full template structure");
-    assertTrue(created.get(1).hideEmptyFields);
-  }
-
   @Test void language_parameter_reaches_the_cee_config() throws Exception
   {
     call("show_template", Map.of("template", TEMPLATE_JSON, "language", "de"));
@@ -217,8 +225,6 @@ final class CeeMcpTest
         .readTree(get(web.sessionUrl(created.get(0)) + "/data").body()).get("config");
     assertEquals("de", config.get("defaultLanguage").asText());
     assertEquals("en", config.get("fallbackLanguage").asText());
-    assertFalse(config.get("showSampleTemplateLinks").asBoolean(),
-        "sample-template loader is pinned off");
   }
 
   @Test void show_instance_requires_both_artifacts()
