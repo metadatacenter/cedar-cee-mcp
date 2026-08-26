@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -109,6 +110,13 @@ final class EndToEndStdioIT
         "collect_instance", "list_sessions"})
       assertTrue(names.contains(expected), "missing " + expected + "; got " + names);
     assertEquals(6, names.size(), names.toString());
+
+    String advertisedTools = response.at("/result/tools").toString();
+    assertTrue(advertisedTools.contains("render_instance_artifact"), advertisedTools);
+    for (String obsolete : new String[] {"schema_artifact_to_json", "instance_artifact_to_json",
+        "instance_artifact_to_yaml"})
+      assertFalse(advertisedTools.contains(obsolete),
+          "shipped tool descriptions must not advertise removed tool " + obsolete);
   }
 
   @Test @Order(2) void ping_round_trips() throws IOException

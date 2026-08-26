@@ -143,8 +143,8 @@ final class CeeTools
     properties.put("instance", Map.of("type", "string", "description",
         "Optional instance to pre-fill the form with, as YAML; CEDAR JSON-LD is also accepted. Must be "
             + "a complete instance (every template field present) for the editor to render it — "
-            + "cedar-artifact-mcp's instance_artifact_to_json, given the schema, produces exactly "
-            + "that. Omit to start from an empty form."));
+            + "cedar-artifact-mcp's render_instance_artifact with format: json, given the "
+            + "template, produces exactly that. Omit to start from an empty form."));
     properties.put("timeout_seconds", Map.of("type", "integer", "description",
         "How long this call waits for the user to press Done before returning control to the "
             + "conversation (default " + DEFAULT_FILL_TIMEOUT_SECONDS + ", max "
@@ -297,7 +297,8 @@ final class CeeTools
   {
     return "The user submitted the form (session " + session.id + "). Populated instance, as "
         + "JSON-LD exactly as the editor produced it (cedar-artifact-mcp's "
-        + "instance_artifact_to_yaml converts it to compact YAML if desired):\n\n" + Json.pretty(submitted);
+        + "render_instance_artifact with format: yaml converts it to compact YAML if desired):\n\n"
+        + Json.pretty(submitted);
   }
 
   private static Map<String, Object> templateProperty()

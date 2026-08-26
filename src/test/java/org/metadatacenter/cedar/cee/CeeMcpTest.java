@@ -256,6 +256,8 @@ final class CeeMcpTest
       assertFalse(result.isError(), text(result));
       assertTrue(text(result).contains("Alice"), text(result));
       assertTrue(text(result).contains("JSON-LD"), text(result));
+      assertTrue(text(result).contains("render_instance_artifact"), text(result));
+      assertFalse(text(result).contains("instance_artifact_to_yaml"), text(result));
     } catch (Exception e) {
       throw new AssertionError(e);
     }

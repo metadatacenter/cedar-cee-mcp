@@ -72,8 +72,8 @@ children:
     datatype: xsd:int
 ```
 
-and exported it to the JSON form with `schema_artifact_to_json` — which is what gets passed to
-the tools below.
+and exported it to the JSON form with `render_schema_artifact` and `format: json` — which is what
+gets passed to the tools below.
 
 *Show me this template.*
 
@@ -86,8 +86,8 @@ tab didn't open); nothing is collected back.
 `fill_instance` opens an **editable** form and waits. The user types values — controlled-term
 fields autocomplete against BioPortal via the CEDAR terminology service — and presses the form's
 **Done** button. The tool call returns with the populated instance as **JSON-LD, exactly as the
-editor produced it**. Rendered as compact YAML by `cedar-artifact-mcp`'s `instance_artifact_to_yaml`, the
-instance reads:
+editor produced it**. Rendered as compact YAML by `cedar-artifact-mcp`'s
+`render_instance_artifact` with `format: yaml`, the instance reads:
 
 ```yaml
 type: instance
@@ -141,12 +141,13 @@ ba242ba9-1c3b-4491-950c-c8d7f4291e04  FILL  http://127.0.0.1:52144/s/ba242ba9-1c
 The `template` and `instance` arguments are CEDAR JSON — the JSON Schema and JSON-LD
 forms the CEE natively consumes — and pass through byte-for-byte. This server does no format
 conversion and never interprets artifact content. To work in YAML, translate with
-`cedar-artifact-mcp`: `schema_artifact_to_json` and `instance_artifact_to_json` on the way in, and
-`instance_artifact_to_yaml` for a returned instance if desired.
+`cedar-artifact-mcp`: `render_schema_artifact` and `render_instance_artifact` with `format: json`
+on the way in, and `render_instance_artifact` with `format: yaml` for a returned instance if
+desired.
 
 Pre-filling `fill_instance` with an existing instance requires a complete CEDAR JSON instance —
-the all-fields-present form the editor expects. `cedar-artifact-mcp`'s `instance_artifact_to_json`, given
-the template, produces exactly that form.
+the all-fields-present form the editor expects. `cedar-artifact-mcp`'s
+`render_instance_artifact` with `format: json`, given the template, produces exactly that form.
 
 The optional `language` argument sets the editor's UI language as an ISO code (for example,
 `"de"`); untranslated strings fall back to English.
