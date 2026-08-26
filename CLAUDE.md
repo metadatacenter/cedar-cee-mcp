@@ -10,10 +10,13 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
 
 - **Comments describe code-level facts only.** No PR numbers, session context, or anything that
   needs the authoring context to make sense.
-- **This server does not interpret artifacts.** No parsing, conversion, or validation of artifact
-  content — CEDAR JSON in, JSON-LD out, byte-for-byte, and deliberately **no dependency
-  on `cedar-artifact-library`**. YAML ↔ JSON translation belongs to `cedar-artifact-mcp`; if a
-  conversion concern appears here, it belongs there.
+- **Compact YAML is the primary input form.** Every display/population tool accepts the compact
+  YAML exchange form and also accepts CEDAR JSON. `Json.toObject` uses
+  `cedar-artifact-library`'s compact `YamlArtifactReader` and `JsonArtifactRenderer` to turn YAML
+  into the JSON object the CEE consumes. The library version is pinned by
+  `cedar-artifact-library.version` in `pom.xml`; keep the dependency and pin in place. A populated
+  instance still comes back as JSON-LD exactly as the CEE submitted it. Conversion of that output
+  to YAML, if wanted, belongs to `cedar-artifact-mcp`.
 - **Tests must pass with no skips.** Two tiers: `mvn test` runs the in-process unit tests (no
   browser, no CDN, no network); `mvn verify` adds `EndToEndStdioIT`, which spawns the shaded jar
   and exercises stdio + HTTP from outside the process (shading, resource packaging, tool
@@ -21,8 +24,11 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
   open/xdg-open shims. Anything that needs a *real* browser (CDN failure, rendering) is a manual
   smoke test (README) — don't try to automate a browser in either tier.
 - **The CEE is a pinned, prebuilt bundle** (DESIGN.md Principle 3). Don't introduce npm, Node, or
-  a frontend build. Upgrading the CEE = bump the version string in
-  `src/main/resources/web/session.html` + a manual browser check of both modes.
+  a frontend build. Upgrading the CEE = update `cee.version` and `cee.sha256` together in
+  `pom.xml`, then manually check both browser modes. The configuration sent by `CeeWebServer`
+  uses the CEE 2.0 names `showDownloadMenu`, `defaultLanguage`, `fallbackLanguage`,
+  `terminologyBaseUrl`, `bridgeBaseUrl`, and, for read-only sessions, `readOnlyMode`; do not bring
+  back legacy key names.
 
 ## Layout
 
@@ -32,9 +38,10 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
   first use.
 - `Session` / `SessionStore` — in-memory; UUID ids; `firstSubmission()` future + latest-wins
   resubmission.
-- `Json` — JSON parse/serialize helpers; no artifact interpretation (DESIGN.md Principle 5).
-- `src/main/resources/web/session.html` — the entire frontend. Keep it small enough to read in
-  one sitting.
+- `Json` — reads compact artifact YAML through `cedar-artifact-library`, accepts JSON directly,
+  and serializes the JSON objects exchanged with the CEE (DESIGN.md Principle 5).
+- `src/main/resources/web/session.html` — the small host page around the separately staged CEE
+  bundle. Keep it small enough to read in one sitting.
 
 ## Build & run
 
@@ -44,5 +51,6 @@ mvn test       # unit tests, no network
 ```
 
 There are no environment variables, deliberately. Tests suppress browser-opening by injecting a
-no-op `BrowserOpener` subclass; the terminology endpoint and CEE version are constants
-(`CeeWebServer.TERMINOLOGY_URL`, the version string in `session.html`).
+no-op `BrowserOpener` subclass. The terminology and bridge endpoints are constants
+(`CeeWebServer.TERMINOLOGY_BASE_URL`, `CeeWebServer.BRIDGE_BASE_URL`); the CEE bundle version and
+hash are Maven properties in `pom.xml`.

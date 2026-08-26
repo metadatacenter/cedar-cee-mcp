@@ -14,12 +14,12 @@ several items below are deliberate cuts, not oversights.
   that hand-off proves awkward in practice, revisit the flow — but artifact manipulation stays out
   of this server (DESIGN.md Principle 5), so any fix belongs on the artifact-mcp side.
 
-- **Build without a locally installed library.** Like the sibling Java MCPs, this server pins
-  `cedar-artifact-library:2.8.4-SNAPSHOT`, which must be `mvn install`ed from a local checkout
+- **Build without a locally installed library.** Like `cedar-artifact-mcp`, this server pins
+  `cedar-artifact-library:2.9.2-SNAPSHOT`, which must be `mvn install`ed from a local checkout
   (together with `cedar-parent` and the `cedar-model-*` libraries), so it no longer resolves
   purely from Maven Central. The fix is on the library side — publish released, non-SNAPSHOT
-  artifacts and pin all three Java MCPs to a released version. See `cedar-artifact-mcp`'s ROADMAP
-  for the full note.
+  artifacts and pin both library-backed Java MCPs to a released version. See
+  `cedar-artifact-mcp`'s ROADMAP for the full note.
 
 - **The library dependency here is CEE-driven, not server-driven — the CEDAR server going
   YAML-native does NOT free cee-mcp of `cedar-artifact-library`.** This is a subtle point and it

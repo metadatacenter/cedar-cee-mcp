@@ -49,15 +49,23 @@ the session id with the form left open, degrading to the robust two-step path
 privileged. A later Done press replaces an earlier submission (people fix mistakes); collection
 always returns the latest.
 
-## Principle 5 — JSON in, JSON out; artifact translation lives elsewhere
+## Principle 5 — YAML-first at the tool boundary, JSON at the CEE boundary
 
-The CEE natively consumes CEDAR JSON (JSON Schema templates, JSON-LD instances) and
-produces JSON-LD. This server hands that JSON through **byte-for-byte in both directions** and
-never parses, converts, validates, or otherwise interprets artifact content — it deliberately has
-no dependency on `cedar-artifact-library`. YAML ↔ JSON translation is `cedar-artifact-mcp`'s job
-(`render_schema_artifact` and `render_instance_artifact`, with the requested `format`); YAML handed
-to a tool here is rejected with a redirect to those tools, not converted. If a conversion concern
-ever seems to belong here, it belongs there.
+The tool surface accepts CEDAR artifacts as compact YAML (the preferred LLM-facing form) or as
+CEDAR JSON. Before a session is created, `Json.toObject` passes YAML through
+`cedar-artifact-library`'s compact `YamlArtifactReader` and `JsonArtifactRenderer`; JSON input is
+parsed directly. The library is therefore a load-bearing runtime dependency, pinned by
+`cedar-artifact-library.version` in `pom.xml`. The CEE itself always receives the resulting CEDAR
+JSON object.
+
+The populated instance travels in the other direction as JSON-LD exactly as the CEE submitted it.
+This server does not translate that human-authored output; callers that want compact YAML use
+`cedar-artifact-mcp`'s `render_instance_artifact` with `format: yaml` after collection.
+
+The host configuration must also use the CEE 2.0 vocabulary exactly. Every session sends
+`showDownloadMenu`, `defaultLanguage`, `fallbackLanguage`, `terminologyBaseUrl`, and
+`bridgeBaseUrl`; read-only sessions additionally send `readOnlyMode`. These names are checked
+against the CEE's declared configuration surface by the unit suite.
 
 ## Principle 6 — Never lose the human's input
 
@@ -81,6 +89,6 @@ given the template, produces exactly the complete JSON-LD form the editor needs.
 ## Note — what the terminology URL buys
 
 Controlled-term autocomplete inside the form calls CEDAR's public terminology proxy
-(`terminologyIntegratedSearchUrl` in the CEE config) straight from the user's browser. No key is
+(`terminologyBaseUrl` in the CEE config) straight from the user's browser. No key is
 handled by this MCP. Without network access to that endpoint the form still renders; only
 autocomplete suggestions are lost.
