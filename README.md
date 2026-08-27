@@ -51,10 +51,10 @@ and opens it in your browser; nothing is deployed, hosted, or shared (mechanics 
 
 ## Example workflow
 
-Natural-language prompts the user gives the LLM, and what happens. This server speaks the CEE's
-native form — CEDAR JSON — and passes it through untouched in both directions; the
-artifact translation in this walkthrough (YAML shown for readability) is `cedar-artifact-mcp`'s
-work, not this server's.
+Natural-language prompts the user gives the LLM, and what happens. Compact YAML is the primary
+input form: this server converts it to the CEDAR JSON the CEE consumes through
+`cedar-artifact-library` (DESIGN.md, Principle 5). CEDAR JSON is also accepted and passes through
+untouched.
 
 Assume the LLM has authored a Patient Study template with `cedar-artifact-mcp`:
 
@@ -72,8 +72,8 @@ children:
     datatype: xsd:int
 ```
 
-and exported it to the JSON form with `render_schema_artifact` and `format: json` — which is what
-gets passed to the tools below.
+That YAML is what gets passed to the tools below, as it is — no export step. (Its JSON form, from
+`render_schema_artifact` with `format: json`, works equally.)
 
 *Show me this template.*
 
@@ -138,12 +138,11 @@ ba242ba9-1c3b-4491-950c-c8d7f4291e04  FILL  http://127.0.0.1:52144/s/ba242ba9-1c
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
 
-The `template` and `instance` arguments are CEDAR JSON — the JSON Schema and JSON-LD
-forms the CEE natively consumes — and pass through byte-for-byte. This server does no format
-conversion and never interprets artifact content. To work in YAML, translate with
-`cedar-artifact-mcp`: `render_schema_artifact` and `render_instance_artifact` with `format: json`
-on the way in, and `render_instance_artifact` with `format: yaml` for a returned instance if
-desired.
+The `template` and `instance` arguments accept compact YAML — the primary form — or CEDAR JSON,
+the JSON Schema and JSON-LD forms the CEE natively consumes. YAML is converted to CEDAR JSON
+through `cedar-artifact-library` before it reaches the editor; JSON passes through byte-for-byte.
+For a returned instance in compact YAML, convert with `cedar-artifact-mcp`'s
+`render_instance_artifact` and `format: yaml`.
 
 Pre-filling `fill_instance` with an existing instance requires a complete CEDAR JSON instance —
 the all-fields-present form the editor expects. `cedar-artifact-mcp`'s
@@ -181,7 +180,9 @@ editing the config.
 
 ## Requirements
 
-- Java 17+, Maven 3.9+ (all dependencies are on Maven Central — no local library builds needed)
+- Java 17+, Maven 3.9+. The build pins `cedar-artifact-library:2.9.2-SNAPSHOT`, which must be
+  `mvn install`ed from a local checkout together with `cedar-parent` and the `cedar-model-*`
+  libraries (see ROADMAP.md); the other dependencies resolve from Maven Central.
 - A browser. The CEE bundle is served locally, so the only network the form needs is CEDAR's
   terminology service for controlled-term autocomplete and its bridge service for the
   external-authority fields (ORCID, ROR, DOI, PubMed, RRID, NIH grant, PFAS).
