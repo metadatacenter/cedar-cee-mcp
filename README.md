@@ -180,13 +180,13 @@ editing the config.
 
 ## Requirements
 
-- Java 17+, Maven 3.9+. The build pins `cedar-artifact-library:2.9.2-SNAPSHOT`, which must be
-  `mvn install`ed from a local checkout together with `cedar-parent` and the `cedar-model-*`
-  libraries (see ROADMAP.md); the other dependencies resolve from Maven Central.
+- Java 17+, Maven 3.9+. The build pins released `cedar-artifact-library:2.9.3` and resolves it
+  and the other released CEDAR Java artifacts from the anonymous-read BMIR Nexus repository
+  declared in `pom.xml`.
 - A browser. The CEE bundle is served locally, so the only network the form needs is CEDAR's
   terminology service for controlled-term autocomplete and its bridge service for the
   external-authority fields (ORCID, ROR, DOI, PubMed, RRID, NIH grant, PFAS).
-- The build fetches the CEE package from the BMIR Nexus once per pinned version; reads are
+- The build fetches the stable CEE package from npmjs once per pinned version; reads are
   anonymous, and a rebuild afterwards needs no network.
 
 ## Build
@@ -219,7 +219,7 @@ template and confirm the form renders read-only in the opened tab; then `fill_in
 value, press **Done**, and confirm the instance comes back. This end-to-end loop — bundle load,
 read-only rendering, editable rendering, a controlled term resolved against the terminology
 service, Done → submit → returned instance — has been verified against CEE
-`2.0.0-dev.20260818.6dca9bf`. Watch the browser console while you do: CEE reports a configuration
+`2.0.3`. Watch the browser console while you do: CEE reports a configuration
 key it does not read, and that is how a stale key is found.
 
 ## License

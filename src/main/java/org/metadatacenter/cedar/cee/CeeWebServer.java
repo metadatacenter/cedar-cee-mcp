@@ -19,10 +19,10 @@ import java.util.concurrent.Executors;
  * one static host page that loads the CEE web-component bundle and drives it with per-session
  * data.
  *
- * <p>The bundle is served from here too, out of the jar. It is published to the BMIR Nexus under
- * the {@code @org.metadatacenter} scope rather than to npmjs, so no public CDN carries it and the
- * page has nothing to link to; the build fetches the package and stages the bundle as a resource.
- * A session therefore needs no network beyond the terminology proxy the autocomplete calls.
+ * <p>The bundle is served from here too, out of the jar. The build fetches the pinned stable npm
+ * package and stages its self-contained bundle as a resource, so the editor's own availability
+ * does not depend on a CDN at runtime. A session needs no network beyond the terminology and bridge
+ * services used by its fields.
  *
  * <p>Routes:
  * <ul>

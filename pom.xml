@@ -37,19 +37,18 @@
     <json-schema-validator.version>3.0.0</json-schema-validator.version>
 
     <!--
-      The CEE web-component bundle this MCP serves. It is published to the BMIR Nexus under the
-      @org.metadatacenter scope rather than to npmjs, so no public CDN carries it and the page can
-      not link to one: the build fetches the package and the local web server serves the bundle out
-      of the jar. That also means a session works with no network beyond the terminology proxy.
+      The stable CEE web-component bundle this MCP serves. The build fetches the public npm package
+      and the local web server serves the bundle out of the jar, so a session works with no network
+      beyond the terminology and bridge services used by the fields themselves.
 
       Both lines move together on a bump. The hash is the bundle's own, from the package's
-      bundle-manifest.json, and the build refuses a bundle that does not match it — a dev version
-      label can name two different builds, so the version alone does not identify the bytes.
+      bundle-manifest.json, and the build refuses a bundle that does not match it.
     -->
-    <cee.version>2.0.0-dev.20260818.6dca9bf</cee.version>
-    <cee.sha256>2d7b7206222d36b5631b4648479500a8b8738daa7f40107cacf8796b2d3112b9</cee.sha256>
-    <cee.registry>https://nexus.bmir.stanford.edu/repository/npm-cedar</cee.registry>
-    <cedar-artifact-library.version>2.9.2-SNAPSHOT</cedar-artifact-library.version>
+    <cee.version>2.0.3</cee.version>
+    <cee.sha256>b1e86f4a2b94331376a1d9d96af5a20e61dab401b393e116f0c6827b2a7e44a2</cee.sha256>
+    <cee.registry>https://registry.npmjs.org</cee.registry>
+    <cee.package>cedar-embeddable-editor</cee.package>
+    <cedar-artifact-library.version>2.9.3</cedar-artifact-library.version>
     <jackson-databind.version>2.17.2</jackson-databind.version>
     <!--
       Jackson 3 (used by the MCP SDK's mcp-json-jackson3) keeps the annotations package
@@ -61,6 +60,16 @@
     <junit.version>5.11.4</junit.version>
     <slf4j.version>2.0.16</slf4j.version>
   </properties>
+
+  <repositories>
+    <!-- Released CEDAR Java artifacts are published to the anonymous-read BMIR Nexus. -->
+    <repository>
+      <id>bmir-nexus-releases</id>
+      <url>https://nexus.bmir.stanford.edu/repository/releases</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+  </repositories>
 
   <dependencies>
     <!-- CEDAR artifact model — reads compact YAML and renders CEDAR JSON, so this MCP
@@ -232,13 +241,14 @@
                 <mkdir dir="${project.build.directory}/cee"/>
                 <mkdir dir="${project.build.outputDirectory}/web"/>
                 <!-- skipexisting keeps a rebuild offline once the version has been fetched once -->
-                <get src="${cee.registry}/@org.metadatacenter/cedar-embeddable-editor/-/cedar-embeddable-editor-${cee.version}.tgz"
+                <get src="${cee.registry}/${cee.package}/-/${cee.package}-${cee.version}.tgz"
                      dest="${cee.tgz}" skipexisting="true" verbose="false"/>
                 <untar src="${cee.tgz}" dest="${project.build.directory}/cee" compression="gzip">
                   <patternset><include name="package/cedar-embeddable-editor.js"/></patternset>
                   <mapper type="flatten"/>
                 </untar>
-                <copy file="${project.build.directory}/cee/cedar-embeddable-editor.js" tofile="${cee.js}"/>
+                <copy file="${project.build.directory}/cee/cedar-embeddable-editor.js"
+                      tofile="${cee.js}" overwrite="true"/>
                 <checksum file="${cee.js}" algorithm="SHA-256" property="cee.sha256.actual"/>
                 <fail message="The CEE bundle does not match the hash this build pins.${line.separator}  expected ${cee.sha256}${line.separator}  actual   ${cee.sha256.actual}${line.separator}Delete ${cee.tgz} and rebuild, or update cee.sha256 if the version was bumped deliberately.">
                   <condition><not><equals arg1="${cee.sha256}" arg2="${cee.sha256.actual}"/></not></condition>

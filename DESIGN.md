@@ -26,13 +26,10 @@ persistence, non-loopback binds) is out of scope — see ROADMAP.md.
 The CEE is consumed as the single self-contained web-component bundle its npm package publishes
 (`cedar-embeddable-editor.js`), pinned by version and served by this server out of its own jar.
 There is no frontend build step, no npm, no Angular toolchain in this repo. The build fetches the
-package from the BMIR Nexus, where the CEE publishes under the `@org.metadatacenter` scope, and
-verifies the bundle against the hash the pin names — a dev version label can be republished, so the
-version alone does not identify the bytes.
+stable package from npmjs and verifies the bundle against the hash the pin names.
 
-Serving it locally is not a preference. No public CDN carries a package published to a private
-registry, so there is nothing for the page to link to. It also means a session needs no network but
-the terminology and bridge servers the fields themselves call.
+Serving it locally keeps a session independent of package/CDN availability at runtime. A session
+needs no network but the terminology and bridge servers the fields themselves call.
 
 Upgrading the CEE is two lines in the pom — version and hash — plus a browser check, and the
 configuration the host page sends has to be checked against the release's own surface: CEE reads a

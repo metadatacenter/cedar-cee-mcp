@@ -34,9 +34,8 @@
 </div>
 
 <script>
-  // The CEE web-component bundle, served by cedar-cee-mcp out of its own jar. It is published to
-  // the BMIR Nexus rather than to npmjs, so there is no CDN to link to — and nothing here depends
-  // on the network reaching one.
+  // The pinned CEE web-component bundle is served by cedar-cee-mcp out of its own jar, so nothing
+  // here depends on a CDN at runtime.
   const CEE_BUNDLE = '/cee/cedar-embeddable-editor.js';
 
   const sessionId = location.pathname.split('/')[2];
