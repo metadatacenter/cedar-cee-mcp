@@ -171,7 +171,7 @@ There is nothing to configure. Registration for Claude Code (`~/.claude.json`):
 ```json
 "cedar-cee": {
   "command": "/usr/bin/java",
-  "args": ["-jar", "/path/to/cedar-cee-mcp/target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar"]
+  "args": ["-jar", "/path/to/cedar-cee-mcp/target/cedar-cee-mcp.jar"]
 }
 ```
 
@@ -192,7 +192,7 @@ editing the config.
 ## Build
 
 ```bash
-mvn package        # builds target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar (shaded, executable)
+mvn package        # builds the shaded jar and its stable target/cedar-cee-mcp.jar copy
 mvn test           # unit tests — in-process, no browser
 mvn verify         # + the end-to-end IT: spawns the shaded jar, speaks real JSON-RPC over
                    #   stdio, and exercises the session web server over HTTP. No browser opens —
@@ -204,7 +204,7 @@ mvn verify         # + the end-to-end IT: spawns the shaded jar, speaks real JSO
 Protocol-level (no browser):
 
 ```bash
-cat <<'EOF' | java -jar target/cedar-cee-mcp-0.1.0-SNAPSHOT-all.jar
+cat <<'EOF' | java -jar target/cedar-cee-mcp.jar
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}
 {"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
