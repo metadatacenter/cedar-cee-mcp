@@ -3,6 +3,12 @@
 Scope decisions and deferred work. The server is local, single-user machinery by design;
 several items below are deliberate cuts, not oversights.
 
+## Done
+
+- **Offline use.** The CEE bundle is fetched at build time and served from the jar, which the
+  move to a Nexus-published CEE forced and which costs the artifact 2 MB. A session reaches the
+  network only for the terminology and bridge services the fields themselves call.
+
 ## Next
 
 - **Material icon font.** The CEE's icon ligatures render as text (`more_vert`, `unfold_more`)
@@ -33,12 +39,8 @@ several items below are deliberate cuts, not oversights.
 
 - **Inline in-chat rendering (MCP Apps).** The emerging MCP extension for `ui://` tool-result
   resources rendered in the client. Revisit when client support is broad and the sandbox/CSP
-  story accommodates a 2.7 MB component bundle that needs network access to the terminology
+  story accommodates a 2 MB component bundle that needs network access to the terminology
   service. The localhost-tab approach works in every client today, including terminal ones.
-
-- **Offline use.** *Done.* The bundle is fetched at build time and served from the jar, which the
-  move to a Nexus-published CEE forced and which costs the artifact 2 MB. A session now reaches the
-  network only for the terminology and bridge services the fields themselves call.
 
 ## Out of scope
 
