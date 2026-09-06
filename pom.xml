@@ -48,15 +48,15 @@
     <cee.sha256>b1e86f4a2b94331376a1d9d96af5a20e61dab401b393e116f0c6827b2a7e44a2</cee.sha256>
     <cee.registry>https://registry.npmjs.org</cee.registry>
     <cee.package>cedar-embeddable-editor</cee.package>
-    <cedar-artifact-library.version>2.9.3</cedar-artifact-library.version>
-    <jackson-databind.version>2.17.2</jackson-databind.version>
+    <cedar-artifact-library.version>2.9.8</cedar-artifact-library.version>
     <!--
-      Jackson 3 (used by the MCP SDK's mcp-json-jackson3) keeps the annotations package
-      at the 2.x group id but needs a 3.x release that adds JsonFormat.Shape.POJO; the
-      2.x annotations jar that jackson-databind pulls transitively predates that
-      constant. Pin the 3.x annotations release, which serves both.
+      Matched to what cedar-artifact-library brings, so this server parses session payloads with
+      the databind its own dependency was built against. jackson-annotations is deliberately not
+      pinned beside it: databind reaches for the annotations release of its own line, and the MCP
+      SDK's Jackson 3 needs JsonFormat.Shape.POJO, added in 2.20. Letting annotations follow
+      databind satisfies both, where a hand-picked version satisfies them only until one moves.
     -->
-    <jackson-annotations.version>3.0-rc5</jackson-annotations.version>
+    <jackson-databind.version>2.22.2</jackson-databind.version>
     <junit.version>5.11.4</junit.version>
     <slf4j.version>2.0.16</slf4j.version>
   </properties>
@@ -99,13 +99,6 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson-databind.version}</version>
-    </dependency>
-
-    <!-- Pin jackson-annotations to 3.x so Jackson 3 databind finds JsonFormat.Shape.POJO. -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson-annotations.version}</version>
     </dependency>
 
     <!-- SLF4J binding for MCP SDK log output. -->
@@ -199,7 +192,7 @@
                 cedar-model-library and cedar-model-validation-library (pulled in transitively by
                 cedar-artifact-library) bundle Jackson 2.x annotation classes that lack
                 JsonFormat.Shape.POJO, which Jackson 3 (the MCP SDK) needs. Strip the bundled copies
-                so the pinned 3.x jackson-annotations jar wins. (Matches cedar-artifact-mcp.)
+                so the annotations jar the build resolved wins.
               -->
               <filters>
                 <filter>
