@@ -138,7 +138,7 @@ ba242ba9-1c3b-4491-950c-c8d7f4291e04  FILL  http://127.0.0.1:52144/s/ba242ba9-1c
 | `list_sessions()` | What is currently showing: id, mode, URL, age, submitted state. |
 | `ping(message)` | Echo; verifies the server is reachable. |
 
-The `template` and `instance` arguments accept compact YAML — the primary form — or CEDAR JSON,
+The `template` and `instance` arguments accept compact, read-only YAML — the primary display form — or CEDAR JSON,
 the JSON Schema and JSON-LD forms the CEE natively consumes. YAML is converted to CEDAR JSON
 through `cedar-artifact-library` before it reaches the editor; JSON passes through byte-for-byte.
 For a returned instance in compact YAML, convert with `cedar-artifact-mcp`'s

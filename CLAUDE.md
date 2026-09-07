@@ -10,8 +10,8 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
 
 - **Comments describe code-level facts only.** No PR numbers, session context, or anything that
   needs the authoring context to make sense.
-- **Compact YAML is the primary input form.** Every display/population tool accepts the compact
-  YAML exchange form and also accepts CEDAR JSON. `Json.toObject` uses
+- **Compact YAML is the primary input form.** Every display/population tool accepts the compact,
+  read-only YAML form and also accepts CEDAR JSON. `Json.toObject` uses
   `cedar-artifact-library`'s compact `YamlArtifactReader` and `JsonArtifactRenderer` to turn YAML
   into the JSON object the CEE consumes. The library version is pinned by
   `cedar-artifact-library.version` in `pom.xml`; keep the dependency and pin in place. A populated

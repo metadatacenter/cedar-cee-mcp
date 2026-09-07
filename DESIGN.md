@@ -48,7 +48,7 @@ always returns the latest.
 
 ## Principle 5 — YAML-first at the tool boundary, JSON at the CEE boundary
 
-The tool surface accepts CEDAR artifacts as compact YAML (the preferred LLM-facing form) or as
+The tool surface accepts CEDAR artifacts as compact, read-only YAML (the preferred LLM-facing form) or as
 CEDAR JSON. Before a session is created, `Json.toObject` passes YAML through
 `cedar-artifact-library`'s compact `YamlArtifactReader` and `JsonArtifactRenderer`; JSON input is
 parsed directly. The library is therefore a load-bearing runtime dependency, pinned by
