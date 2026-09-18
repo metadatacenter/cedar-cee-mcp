@@ -1,8 +1,9 @@
 # For Claude (or any new contributor)
 
 Start with [DESIGN.md](./DESIGN.md) (principles — especially the headless-server-conjures-a-browser
-model and the blocking/collect duality) and [ROADMAP.md](./ROADMAP.md) (deliberate cuts vs.
-deferred work). [README.md](./README.md) is the user-facing story.
+model and the blocking/collect duality) and the
+[CEDAR MCP Servers Roadmap](https://github.com/metadatacenter/cedar-development/blob/develop/ops/MCP-ROADMAP.md)
+(deliberate cuts versus deferred work). [README.md](./README.md) is the user-facing story.
 
 ## Conventions you must respect
 

@@ -20,7 +20,7 @@ import java.util.Map;
  * <p>The display surface is a loopback-only web server ({@link CeeWebServer}) hosting a single
  * page that loads the CEE web-component bundle; tools ({@link CeeTools}) create sessions, open
  * browser tabs, and wait for / collect submitted instances. See {@code DESIGN.md} and
- * {@code ROADMAP.md}.
+ * {@code README.md}.
  */
 public final class CedarCeeMcpServer
 {

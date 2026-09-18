@@ -47,7 +47,7 @@ server — and this one is where a person **sees and completes** them.
 Everything runs on your own machine — each tool serves a private page from the MCP server itself
 and opens it in your browser; nothing is deployed, hosted, or shared (mechanics in
 [How it works](#how-it-works) below). See [DESIGN.md](./DESIGN.md) for the principles and
-[ROADMAP.md](./ROADMAP.md) for deferred work.
+the [CEDAR MCP Servers Roadmap](https://github.com/metadatacenter/cedar-development/blob/develop/ops/MCP-ROADMAP.md) for deferred work.
 
 ## Example workflow
 

@@ -19,7 +19,8 @@ tool result carries the URL so a failed auto-open degrades to "click this".
 The security story is deliberately minimal and must stay honest about it: loopback bind +
 unguessable UUID session ids + in-memory sessions that die with the server. That is local,
 single-user scope. Anything that would make this a deployable service (auth, TLS, session
-persistence, non-loopback binds) is out of scope — see ROADMAP.md.
+persistence, non-loopback binds) is out of scope: this is a local, single-user,
+conversation-lifetime tool.
 
 ## Principle 3 — The CEE is a prebuilt, pinned dependency
 
@@ -58,6 +59,14 @@ JSON object.
 The populated instance travels in the other direction as JSON-LD exactly as the CEE submitted it.
 This server does not translate that human-authored output; callers that want compact YAML use
 `cedar-artifact-mcp`'s `render_instance_artifact` with `format: yaml` after collection.
+
+This dependency is CEE-driven, not server-driven, and the distinction keeps getting lost. The
+conversion here feeds the **CEE web component**, which consumes JSON-LD internally;
+`cedar-artifact-rest-mcp` converts for the **CEDAR server**, a different target. Its plan to pass
+YAML straight through, and so to drop `cedar-artifact-library` once the server accepts YAML, has
+no equivalent here. This server can shed the library only if the CEE component itself accepts
+YAML, an upstream change outside this project and not on the horizon. Whatever the CEDAR server
+does about YAML, `cedar-cee-mcp` keeps this dependency.
 
 The host configuration must also use the CEE 2.0 vocabulary exactly. Every session sends
 `showDownloadMenu`, `defaultLanguage`, `fallbackLanguage`, `terminologyBaseUrl`, and
