@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 /**
@@ -28,6 +29,8 @@ import java.util.concurrent.Executors;
  * <ul>
  *   <li>{@code GET /s/{id}} — the host page (same page for every mode; it fetches its data);</li>
  *   <li>{@code GET /cee/cedar-embeddable-editor.js} — the CEE bundle, shared by every session;</li>
+ *   <li>{@code GET /vendor/cedar-design-tokens/{file}.css} — the shared design tokens the host
+ *       page's own styles read, likewise shared;</li>
  *   <li>{@code GET /s/{id}/data} — the session's mode, CEE config, template, and optional
  *       instance as one JSON object;</li>
  *   <li>{@code POST /s/{id}/submit} — the populated JSON-LD instance from the browser's Done
@@ -44,6 +47,15 @@ final class CeeWebServer
   static final String CEE_BUNDLE_PATH = "/cee/cedar-embeddable-editor.js";
 
   private static final String CEE_BUNDLE_RESOURCE = "/web/cedar-embeddable-editor.js";
+
+  /**
+   * Where the host page links the shared design tokens from. The compiled stylesheets are vendored
+   * under the same path in the jar, with a manifest naming the token version and each file's digest,
+   * which the design-token adoption check verifies.
+   */
+  static final String TOKENS_PATH = "/vendor/cedar-design-tokens/";
+
+  static final Set<String> TOKEN_STYLESHEETS = Set.of("custom-properties.css", "secondary-action.css");
 
   /**
    * CEDAR's public terminology server, backing the CEE's controlled-term autocomplete. A base URL,
@@ -120,6 +132,9 @@ final class CeeWebServer
       } else if ("GET".equals(method) && CEE_BUNDLE_PATH.equals(path)) {
         // Not session-scoped: one bundle serves every session, and the browser caches it once.
         respond(exchange, 200, "text/javascript; charset=utf-8", resource(CEE_BUNDLE_RESOURCE));
+      } else if ("GET".equals(method) && path.startsWith(TOKENS_PATH)
+          && TOKEN_STYLESHEETS.contains(path.substring(TOKENS_PATH.length()))) {
+        respond(exchange, 200, "text/css; charset=utf-8", resource("/web" + path));
       } else if (path.startsWith("/s/")) {
         routeSession(exchange, method, path);
       } else {

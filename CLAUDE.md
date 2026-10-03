@@ -30,6 +30,11 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
   uses the CEE 2.0 names `showDownloadMenu`, `defaultLanguage`, `fallbackLanguage`,
   `terminologyBaseUrl`, `bridgeBaseUrl`, and, for read-only sessions, `readOnlyMode`; do not bring
   back legacy key names.
+- **The host page's styles use the shared design tokens.** Every colour, size, spacing, weight and
+  layer in `session.html` is a `var(--cedar-*)`; `cedarcli check design-tokens --repo
+  mcp/cedar-cee-mcp --strict` must pass, and the `Design tokens` workflow runs it on every push.
+  Advance the vendored copy as `cedar-development/ops/MCP-RUNBOOK.md` describes, never by editing
+  it.
 
 ## Layout
 
@@ -43,6 +48,8 @@ Same house rules as the sibling MCPs (`cedar-artifact-mcp`, `cedar-artifact-rest
   and serializes the JSON objects exchanged with the CEE (DESIGN.md Principle 5).
 - `src/main/resources/web/session.html` — the small host page around the separately staged CEE
   bundle. Keep it small enough to read in one sitting.
+- `src/main/resources/web/vendor/cedar-design-tokens/` — the shared design tokens the page's styles
+  read, vendored with a `manifest.json` of their version and digests (DESIGN.md Principle 3).
 
 ## Build & run
 

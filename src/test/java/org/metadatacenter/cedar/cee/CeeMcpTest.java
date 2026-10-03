@@ -1,5 +1,6 @@
 package org.metadatacenter.cedar.cee;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -10,8 +11,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -113,6 +116,27 @@ final class CeeMcpTest
     assertTrue(dataJson.get("config").get("readOnlyMode").asBoolean(), "view modes are read-only");
     assertEquals("Patient Study", dataJson.get("templateObject").get("schema:name").asText());
     assertFalse(dataJson.has("instanceObject"));
+  }
+
+  @Test void serves_the_vendored_token_stylesheets_the_host_page_links() throws Exception
+  {
+    String base = web.sessionUrl(sessions.create(Session.Mode.VIEW_TEMPLATE, Json.asObject(TEMPLATE_JSON), null));
+    String page = get(base).body();
+    String root = base.substring(0, base.indexOf("/s/"));
+    JsonNode manifest = JACKSON.readTree(
+        CeeWebServer.class.getResourceAsStream("/web" + CeeWebServer.TOKENS_PATH + "manifest.json"));
+    List<String> vendored = new ArrayList<>();
+    manifest.get("files").fieldNames().forEachRemaining(vendored::add);
+    assertEquals(CeeWebServer.TOKEN_STYLESHEETS, Set.copyOf(vendored), "every vendored file is served");
+    for (String name : vendored) {
+      assertTrue(page.contains("href=\"" + CeeWebServer.TOKENS_PATH + name + "\""), "the page links " + name);
+      HttpResponse<String> css = get(root + CeeWebServer.TOKENS_PATH + name);
+      assertEquals(200, css.statusCode());
+      assertEquals("text/css; charset=utf-8", css.headers().firstValue("Content-Type").orElseThrow());
+      assertTrue(css.body().contains("--cedar-") || css.body().contains(".cedar-"), name + " is a token stylesheet");
+    }
+    assertEquals(404, get(root + CeeWebServer.TOKENS_PATH + "manifest.json").statusCode());
+    assertEquals(404, get(root + CeeWebServer.TOKENS_PATH + "../session.html").statusCode());
   }
 
   /** The configuration surface CEE 2.0 declares, from its CONFIG_SCHEMA. */

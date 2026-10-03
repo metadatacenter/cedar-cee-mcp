@@ -37,6 +37,14 @@ configuration the host page sends has to be checked against the release's own su
 fixed set of keys and ignores the rest, reporting them to a console a host does not watch. The unit
 suite asserts every key this server sends is one CEE reads.
 
+The host page's own styles follow the same rule. They read the shared CEDAR design tokens, whose
+compiled stylesheets are vendored under `src/main/resources/web/vendor/cedar-design-tokens` and
+served from the jar like the bundle. A manifest beside them names the token version and each file's
+digest. The token package has no stable release, and the cleanup on CEDAR's Nexus removes its
+development builds, so a build that fetched one would fail once its version was gone. The
+design-token adoption check reads the page's style block and refuses a literal colour, size or
+spacing, and it verifies the vendored copy against its manifest.
+
 ## Principle 4 — The return path is a tool result, blocking with an escape hatch
 
 The one genuine impedance mismatch: the LLM only learns things through tool results, but the

@@ -4,29 +4,55 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CEDAR</title>
+  <!-- The shared CEDAR design tokens, vendored and served by cedar-cee-mcp like the CEE bundle. -->
+  <link rel="stylesheet" href="/vendor/cedar-design-tokens/custom-properties.css">
+  <link rel="stylesheet" href="/vendor/cedar-design-tokens/secondary-action.css">
   <style>
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    header {
-      display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem;
-      background: #205493; color: #fff; position: sticky; top: 0; z-index: 10;
+    body {
+      margin: 0;
+      font-family: var(--cedar-font-family);
+      font-size: var(--cedar-font-size);
+      color: var(--cedar-text-primary);
+      background: var(--cedar-surface-raised);
     }
-    header .title { font-weight: 600; }
-    header .spacer { flex: 1; }
-    header button {
-      font-size: 1rem; padding: 0.45rem 1.1rem; border: none; border-radius: 4px;
-      background: #2e8540; color: #fff; cursor: pointer;
+    .session-bar {
+      position: sticky;
+      top: 0;
+      z-index: var(--cedar-layer-sticky);
+      display: flex;
+      align-items: center;
+      gap: var(--cedar-space-4);
+      padding: var(--cedar-space-2) var(--cedar-space-4);
+      background: var(--cedar-color-primary);
+      color: var(--cedar-color-on-primary);
     }
-    header button:disabled { background: #8aa; cursor: default; }
-    #status { padding: 0.5rem 1rem; color: #444; }
-    #status.error { color: #b00; font-weight: 600; }
-    #editor { padding: 0 1rem 2rem; }
+    .session-title {
+      flex: 1;
+      font-size: var(--cedar-font-size-heading);
+      font-weight: var(--cedar-font-weight-medium);
+      line-height: var(--cedar-line-height-heading);
+    }
+    /* The shared ring is drawn in the primary colour, which the bar itself is painted in. */
+    .session-bar :focus-visible {
+      outline-color: var(--cedar-color-on-primary);
+    }
+    #status {
+      padding: var(--cedar-space-2) var(--cedar-space-4);
+      color: var(--cedar-text-muted);
+    }
+    #status.error {
+      color: var(--cedar-status-error-text);
+      font-weight: var(--cedar-font-weight-medium);
+    }
+    #editor {
+      padding: 0 var(--cedar-space-4) var(--cedar-space-6);
+    }
   </style>
 </head>
 <body>
-<header>
-  <span class="title" id="title">CEDAR</span>
-  <span class="spacer"></span>
-  <button id="done" hidden>Done &mdash; return to chat</button>
+<header class="session-bar">
+  <span class="session-title" id="title">CEDAR</span>
+  <button class="cedar-secondary-action" id="done" hidden>Done &mdash; return to chat</button>
 </header>
 <div id="status">Loading the CEDAR Embeddable Editor&hellip;</div>
 <div id="editor">
