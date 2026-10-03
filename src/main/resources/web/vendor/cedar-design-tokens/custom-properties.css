@@ -6,10 +6,10 @@
   --cedar-font-weight-medium: 500;
   --cedar-font-size-small: 12px;
   --cedar-font-size: 14px;
-  --cedar-font-size-element-heading: 18px;
-  --cedar-font-size-heading: 20px;
-  --cedar-font-size-artifact-title: clamp(19px, 3cqi, 26px);
+  --cedar-font-size-large: 18px;
+  --cedar-font-size-artifact-title: clamp(20px, 3cqi, 26px);
   --cedar-line-height-heading: 1.25;
+  --cedar-line-height-tight: 1;
   --cedar-color-primary: #0f7686;
   --cedar-color-primary-strong: #0b6373;
   --cedar-color-on-primary: #ffffff;

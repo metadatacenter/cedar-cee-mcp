@@ -1,8 +1,8 @@
 {
   "package": "@org.metadatacenter/cedar-design-tokens",
-  "version": "0.1.0-dev.20261003.eb5032bf",
+  "version": "0.1.0-dev.20261003.7495ef39",
   "files": {
-    "custom-properties.css": "018866c306f445123c15f79ffcbd3903fb83609f694e675dfa5078fef1828716",
+    "custom-properties.css": "4eaf8db36a586904e35462d70e0d57f6b3efb15ab3874c352d3aefa2100a4b5e",
     "secondary-action.css": "5ba376f266c6c0f034d23d9b775b719d09b1a461588839cca130488454b9540a"
   }
 }
