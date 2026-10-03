@@ -1,0 +1,17 @@
+name: Design tokens
+
+# The session page's own styles read the shared CEDAR design tokens. This is the adoption check
+# every CEDAR frontend runs: a literal colour, size or spacing in the page fails it, and so does a
+# vendored token copy that no longer matches its manifest.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  design-token-adoption:
+    uses: metadatacenter/cedar-design-tokens/.github/workflows/adoption.yml@develop
