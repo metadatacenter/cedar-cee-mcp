@@ -1,7 +1,6 @@
 :root,
 :host {
-  --cedar-font-family: "CEE Roboto", "Helvetica Neue", sans-serif;
-  --cedar-font-family-monospace: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --cedar-font-family: "CEDAR Roboto", "Helvetica Neue", sans-serif;
   --cedar-font-weight-regular: 400;
   --cedar-font-weight-medium: 500;
   --cedar-font-size-small: 12px;
@@ -49,7 +48,6 @@
   --cedar-shadow-overlay: 0 4px 18px rgba(0, 0, 0, 0.13);
   --cedar-motion-duration-fast: 120ms;
   --cedar-motion-duration-normal: 200ms;
-  --cedar-motion-duration-spinner: 2s;
   --cedar-motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --cedar-layer-sticky: 10;
   --cedar-layer-menu: 100;

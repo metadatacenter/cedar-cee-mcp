@@ -215,8 +215,8 @@ final class CeeWebServer
    * form are gone. The UI language follows the session's, falling back to English for untranslated
    * strings.
    *
-   * <p>CEE reads these nine keys and no others, and says so in the browser console when it is handed
-   * something else. Its configuration surface narrowed sharply in 2.0: the panels this MCP used to
+   * <p>CEE reads only the keys its {@code CeeConfig} declares, and says so in the browser console
+   * when it is handed something else. Its configuration surface narrowed sharply in 2.0: the panels this MCP used to
    * switch on — instance data, template source, rendering representation, multi-instance info, the
    * data-quality report — and the header, footer and sample-template chrome it switched off are all
    * gone, along with {@code hideEmptyFields}. Sending them would cost nothing but a console full of

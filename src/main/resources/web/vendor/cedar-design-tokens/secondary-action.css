@@ -4,16 +4,16 @@
   padding: 0 var(--cedar-space-3);
   border: 1px solid var(--cedar-control-border, var(--cedar-control-border-default));
   border-radius: var(--cedar-radius);
-  background: #ffffff;
-  color: #0f7686;
+  background: var(--cedar-surface-raised, #ffffff);
+  color: var(--cedar-color-primary, #0f7686);
   font: inherit;
   cursor: pointer;
 }
 .cedar-secondary-action:hover:not(:disabled):not([aria-disabled=true]), .cedar-secondary-action:active:not(:disabled):not([aria-disabled=true]) {
-  background: #e4f1f1;
+  background: var(--cedar-surface-selected, #e4f1f1);
 }
 .cedar-secondary-action:focus-visible {
-  outline: 2px solid #0f7686;
+  outline: 2px solid var(--cedar-color-primary, #0f7686);
   outline-offset: 2px;
 }
 .cedar-secondary-action:disabled, .cedar-secondary-action[aria-disabled=true] {

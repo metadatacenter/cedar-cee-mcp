@@ -44,8 +44,8 @@
       Both lines move together on a bump. The hash is the bundle's own, from the package's
       bundle-manifest.json, and the build refuses a bundle that does not match it.
     -->
-    <cee.version>2.0.3</cee.version>
-    <cee.sha256>b1e86f4a2b94331376a1d9d96af5a20e61dab401b393e116f0c6827b2a7e44a2</cee.sha256>
+    <cee.version>2.0.23</cee.version>
+    <cee.sha256>97bfdc29582a5fab312ed578123ae3a8a10440c7bcb562f0e1ba263da181cfd3</cee.sha256>
     <cee.registry>https://registry.npmjs.org</cee.registry>
     <cee.package>cedar-embeddable-editor</cee.package>
     <cedar-artifact-library.version>2.9.23</cedar-artifact-library.version>

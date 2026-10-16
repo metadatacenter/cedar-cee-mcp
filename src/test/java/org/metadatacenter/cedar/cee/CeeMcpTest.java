@@ -139,9 +139,10 @@ final class CeeMcpTest
     assertEquals(404, get(root + CeeWebServer.TOKENS_PATH + "../session.html").statusCode());
   }
 
-  /** The configuration surface CEE 2.0 declares, from its CONFIG_SCHEMA. */
+  /** The configuration surface the pinned CEE declares, from its {@code CeeConfig}. */
   private static final List<String> CEE_CONFIG_KEYS = List.of(
-      "showTemplateDescription", "readOnlyMode", "trustTemplateRichText", "showDownloadMenu",
+      "showTemplateDescription", "previewMode", "showFieldType", "suppressEmptyFieldErrors",
+      "readOnlyMode", "trustTemplateRichText", "showDownloadMenu", "showExpandCollapseAll",
       "terminologyBaseUrl", "bridgeBaseUrl", "defaultLanguage", "fallbackLanguage",
       "languageMapPathPrefix");
 
@@ -158,8 +159,9 @@ final class CeeMcpTest
   }
 
   /**
-   * CEE reads nine configuration keys and reports anything else in the browser console, where a
-   * host does not see it. This is that check moved somewhere it fails a build instead.
+   * CEE reads only the keys its {@code CeeConfig} declares and reports anything else in the browser
+   * console, where a host does not see it. This is that check moved somewhere it fails a build
+   * instead.
    */
   @Test void every_configuration_key_is_one_cee_reads() throws Exception
   {
@@ -171,7 +173,7 @@ final class CeeMcpTest
           get(web.sessionUrl(session) + "/data").body()).get("config");
       config.fieldNames().forEachRemaining(key ->
           assertTrue(CEE_CONFIG_KEYS.contains(key),
-              "CEE 2.0 does not read \"" + key + "\"; it would report the key and ignore it"));
+              "CEE does not read \"" + key + "\"; it would report the key and ignore it"));
     }
   }
 
