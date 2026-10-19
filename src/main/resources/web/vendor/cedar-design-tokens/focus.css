@@ -1,0 +1,4 @@
+:where(:focus-visible) {
+  outline: 2px solid var(--cedar-control-focus, var(--cedar-color-primary, #0f7686));
+  outline-offset: 2px;
+}

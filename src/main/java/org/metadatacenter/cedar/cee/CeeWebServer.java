@@ -55,7 +55,7 @@ final class CeeWebServer
    */
   static final String TOKENS_PATH = "/vendor/cedar-design-tokens/";
 
-  static final Set<String> TOKEN_STYLESHEETS = Set.of("custom-properties.css", "secondary-action.css");
+  static final Set<String> TOKEN_STYLESHEETS = Set.of("custom-properties.css", "focus.css", "secondary-action.css");
 
   /**
    * CEDAR's public terminology server, backing the CEE's controlled-term autocomplete. A base URL,
