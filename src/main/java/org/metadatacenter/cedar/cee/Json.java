@@ -3,18 +3,12 @@ package org.metadatacenter.cedar.cee;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.metadatacenter.artifacts.model.reader.ArtifactSourceParser;
 import org.metadatacenter.artifacts.model.reader.YamlArtifactReader;
 import org.metadatacenter.artifacts.model.renderer.JsonArtifactRenderer;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
-import org.yaml.snakeyaml.resolver.Resolver;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Parse/serialize helpers for artifacts crossing into the CEE. The CEE consumes CEDAR JSON, so an
@@ -96,42 +90,19 @@ final class Json
     }
   }
 
-  // ---------------------------------------------------------------------
-  // YAML parsing — a SnakeYAML loader that does NOT resolve date-like scalars to timestamps, so
-  // temporal field values stay strings (matching cedar-artifact-mcp's exchange parser).
-  // ---------------------------------------------------------------------
-
+  /**
+   * Parse a YAML document with the library's parser, which the CEDAR server also reads YAML with.
+   * It resolves YAML 1.2 core scalars, keeps date-like values as strings, and refuses duplicate
+   * keys, unknown tags and a top level that is not a mapping. The mapping it returns goes to the
+   * reader unchanged, because it also holds the text each unquoted number and boolean was written
+   * as, and an instance value keeps that text.
+   */
   private static LinkedHashMap<String, Object> parseYamlMap(String yamlText)
   {
-    Object parsed = newYaml().load(yamlText);
-    if (!(parsed instanceof Map<?, ?>))
-      throw new IllegalArgumentException("YAML must parse to a mapping at the top level (got "
-          + (parsed == null ? "null" : parsed.getClass().getSimpleName()) + ")");
-    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-    for (Map.Entry<?, ?> entry : ((Map<?, ?>) parsed).entrySet())
-      map.put(String.valueOf(entry.getKey()), entry.getValue());
-    return map;
-  }
-
-  private static Yaml newYaml()
-  {
-    LoaderOptions loaderOptions = new LoaderOptions();
-    DumperOptions dumperOptions = new DumperOptions();
-    return new Yaml(new SafeConstructor(loaderOptions), new Representer(dumperOptions),
-        dumperOptions, loaderOptions, new NoTimestampResolver());
-  }
-
-  private static final class NoTimestampResolver extends Resolver
-  {
-    @Override protected void addImplicitResolvers()
-    {
-      addImplicitResolver(Tag.BOOL, BOOL, "yYnNtTfFoO");
-      addImplicitResolver(Tag.INT, INT, "-+0123456789");
-      addImplicitResolver(Tag.FLOAT, FLOAT, "-+0123456789.");
-      addImplicitResolver(Tag.MERGE, MERGE, "<");
-      addImplicitResolver(Tag.NULL, NULL, "~nN\0");
-      addImplicitResolver(Tag.NULL, EMPTY, null);
-      // Tag.TIMESTAMP intentionally not registered — keep date-like scalars as strings.
+    try {
+      return ArtifactSourceParser.yaml(yamlText);
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e.getMessage(), e);
     }
   }
 }
