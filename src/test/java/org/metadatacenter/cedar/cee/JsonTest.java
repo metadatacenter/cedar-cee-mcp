@@ -1,12 +1,9 @@
 package org.metadatacenter.cedar.cee;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.jupiter.api.Test;
-import org.metadatacenter.artifacts.model.reader.ArtifactSourceParser;
-import org.metadatacenter.artifacts.model.reader.YamlArtifactReader;
-import org.metadatacenter.artifacts.model.renderer.JsonArtifactRenderer;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,20 +35,16 @@ final class JsonTest
   }
 
   /**
-   * Every unquoted spelling reaches the CEE as the library's own parser and reader read it, so an
-   * instance value keeps whatever source text the library keeps: 010 is the octal 8 to YAML 1.1 and
-   * 10 to YAML 1.2, and a library that keeps the text keeps 010.
+   * An unquoted instance value reaches the CEE as the string it was written as. The YAML 1.2 core
+   * schema reads 007 and 010 as integers, 1e3 as a float and True as a boolean, but a field's value
+   * is a string, so the CEE receives the source text of each. A ZIP code of 007 is not 7.
    */
-  @Test void an_unquoted_instance_value_is_read_as_the_library_reads_it() throws IOException
+  @Test void an_unquoted_instance_value_keeps_the_text_it_was_written_as()
   {
-    YamlArtifactReader reader = new YamlArtifactReader(true);
-    JsonArtifactRenderer renderer = new JsonArtifactRenderer();
     for (String spelling : List.of("007", "010", "0x1F", "0o17", "1e3", "+1", ".5", "-0", "True", "FALSE",
         "2026-01-02")) {
-      String yaml = instanceWithValue(spelling);
-      ObjectNode expected =
-          renderer.renderTemplateInstanceArtifact(reader.readTemplateInstanceArtifact(ArtifactSourceParser.yaml(yaml)));
-      assertEquals(expected, Json.toObject(yaml), spelling);
+      ObjectNode json = Json.toObject(instanceWithValue(spelling));
+      assertEquals(TextNode.valueOf(spelling), json.path("Answer").path("@value"), spelling);
     }
   }
 }

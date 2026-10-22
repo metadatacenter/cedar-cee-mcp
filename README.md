@@ -180,7 +180,7 @@ editing the config.
 
 ## Requirements
 
-- Java 17+, Maven 3.9+. The build pins released `cedar-artifact-library:2.9.3` and resolves it
+- Java 17+, Maven 3.9+. The build pins released `cedar-artifact-library:2.9.28` and resolves it
   and the other released CEDAR Java artifacts from the anonymous-read BMIR Nexus repository
   declared in `pom.xml`.
 - A browser. The CEE bundle is served locally, so the only network the form needs is CEDAR's
