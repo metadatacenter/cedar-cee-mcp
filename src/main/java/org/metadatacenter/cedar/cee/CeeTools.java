@@ -190,7 +190,7 @@ final class CeeTools
 
       try {
         ObjectNode submitted = session.firstSubmission().get(timeoutSeconds, TimeUnit.SECONDS);
-        return text(instanceResultText(session, submitted));
+        return instanceResult(session, submitted);
       } catch (TimeoutException e) {
         return text("The form is open at " + url + " (session " + session.id + ") but the user "
             + "has not pressed Done yet"
@@ -242,7 +242,7 @@ final class CeeTools
       if (submitted.isEmpty())
         return text("The user has not pressed Done yet (session " + sessionId + ", open at "
             + web.sessionUrl(session) + "). Ask them to finish the form, then collect again.");
-      return text(instanceResultText(session, submitted.get()));
+      return instanceResult(session, submitted.get());
     });
   }
 
@@ -286,6 +286,19 @@ final class CeeTools
     return text("Opened a " + what + " at " + url + " (session " + session.id + ")."
         + (openedInBrowser ? "" : " The browser could not be opened automatically — give the user "
             + "the URL to open themselves."));
+  }
+
+  /**
+   * The fill/collect answer to a submission: the populated instance, or an error saying why the
+   * submission is not one. A submission that names no template is not returned as an instance.
+   */
+  private static McpSchema.CallToolResult instanceResult(Session session, ObjectNode submitted)
+  {
+    Optional<String> refusal = session.refusal(submitted);
+    if (refusal.isPresent())
+      return error("the user pressed Done (session " + session.id + "), but no instance can be returned. "
+          + refusal.get());
+    return text(instanceResultText(session, submitted));
   }
 
   /**

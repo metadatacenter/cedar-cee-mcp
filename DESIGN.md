@@ -89,10 +89,10 @@ just spent minutes typing.
 
 ## Principle 7 — Errors are content
 
-Tool failures (unreadable artifact, unknown session, read-only session) come back as
-`isError=true` results with a message the LLM can act on — not protocol errors. The web surface
-mirrors this — the host page surfaces bundle-load and submit failures as visible page status, so
-the human sees what went wrong without opening a console.
+Tool failures (unreadable artifact, unknown session, read-only session, a submission that names no
+template) come back as `isError=true` results with a message the LLM can act on — not protocol
+errors. The web surface mirrors this — the host page surfaces bundle-load and submit failures as
+visible page status, so the human sees what went wrong without opening a console.
 
 ## Note — pre-filling needs a complete instance
 

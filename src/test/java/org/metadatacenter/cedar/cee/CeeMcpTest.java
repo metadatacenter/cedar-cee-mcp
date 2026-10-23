@@ -336,6 +336,62 @@ final class CeeMcpTest
     assertTrue(text(collected).contains("Alice"), text(collected));
   }
 
+  /**
+   * An instance names the template it is based on, and a template without an @id gives it none. The
+   * editor then sends an empty object, or, before it refused to write one, an instance that names no
+   * template. Neither comes back as the populated instance: both tools answer with an error saying why,
+   * and the page is told the same reason.
+   */
+  @Test void a_template_without_an_id_answers_why_no_instance_comes_back() throws Exception
+  {
+    CompletableFuture<McpSchema.CallToolResult> pending = CompletableFuture.supplyAsync(
+        () -> call("fill_instance", Map.of("template", TEMPLATE_JSON, "timeout_seconds", 30)));
+    Session session = awaitSingleSession();
+
+    HttpResponse<String> response = post(web.sessionUrl(session) + "/submit", "{}");
+    assertEquals(422, response.statusCode());
+    assertTrue(response.body().startsWith("No instance can be sent back to the chat. The template has no @id"),
+        response.body());
+
+    McpSchema.CallToolResult filled = pending.get();
+    assertTrue(filled.isError(), text(filled));
+    assertTrue(text(filled).contains("no instance can be returned"), text(filled));
+    assertTrue(text(filled).contains("The template has no @id"), text(filled));
+    assertTrue(text(filled).contains("schema:isBasedOn"), text(filled));
+    McpSchema.CallToolResult collected = call("collect_instance", Map.of("session_id", session.id));
+    assertTrue(collected.isError(), text(collected));
+    assertEquals(text(filled), text(collected));
+
+    Session unnamed = sessions.create(Session.Mode.FILL, Json.asObject(TEMPLATE_JSON), null);
+    String instance = "{\"schema:name\": \"Draft\", \"Patient Name\": {\"@value\": \"Alice\"}}";
+    assertEquals(422, post(web.sessionUrl(unnamed) + "/submit", instance).statusCode());
+    McpSchema.CallToolResult refused = call("collect_instance", Map.of("session_id", unnamed.id));
+    assertTrue(refused.isError(), text(refused));
+    assertTrue(text(refused).contains("The template has no @id"), text(refused));
+    assertFalse(text(refused).contains("Alice"), text(refused));
+  }
+
+  /** A template with an @id gives the instance its template, so an empty submission is a refusal. */
+  @Test void an_empty_submission_for_a_template_with_an_id_is_an_error() throws Exception
+  {
+    ObjectNode saved = Json.asObject(TEMPLATE_JSON);
+    saved.put("@id", "https://repo.metadatacenter.org/templates/123");
+    Session session = sessions.create(Session.Mode.FILL, saved, null);
+
+    HttpResponse<String> response = post(web.sessionUrl(session) + "/submit", "{}");
+    assertEquals(422, response.statusCode());
+    assertTrue(response.body().contains("names no template"), response.body());
+
+    McpSchema.CallToolResult collected = call("collect_instance", Map.of("session_id", session.id));
+    assertTrue(collected.isError(), text(collected));
+    assertTrue(text(collected).contains("refused the template or instance"), text(collected));
+
+    assertEquals(204, post(web.sessionUrl(session) + "/submit", INSTANCE_JSON).statusCode());
+    McpSchema.CallToolResult corrected = call("collect_instance", Map.of("session_id", session.id));
+    assertFalse(corrected.isError(), text(corrected));
+    assertTrue(text(corrected).contains("Alice"), text(corrected));
+  }
+
   @Test void collect_instance_rejects_unknown_sessions()
   {
     McpSchema.CallToolResult result = call("collect_instance", Map.of("session_id", "nope"));

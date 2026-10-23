@@ -1,10 +1,14 @@
 package org.metadatacenter.cedar.cee;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static org.metadatacenter.model.ModelNodeNames.JSON_LD_ID;
+import static org.metadatacenter.model.ModelNodeNames.SCHEMA_IS_BASED_ON;
 
 /**
  * One browser-rendered CEE session: the template (always present), an optional instance, the
@@ -67,5 +71,32 @@ final class Session
   CompletableFuture<ObjectNode> firstSubmission()
   {
     return submitted;
+  }
+
+  /**
+   * Why a submission is not an instance that can be returned, or empty when it is one. An instance
+   * names the template it is based on, so a submission that names none is not one. The editor sends
+   * such a submission for a template without an {@code @id}, and an empty object for a template or
+   * instance it refused.
+   */
+  Optional<String> refusal(ObjectNode submission)
+  {
+    if (statesText(submission, SCHEMA_IS_BASED_ON))
+      return Optional.empty();
+    if (!statesText(templateJson, JSON_LD_ID))
+      return Optional.of("The template has no @id, so an instance of it cannot name the template it is "
+          + "based on (" + SCHEMA_IS_BASED_ON + "), and no instance can be written. This is typical of a "
+          + "template that has never been saved. Save the template, then open the form again with the "
+          + "saved template, which carries the @id the repository assigned.");
+    return Optional.of("What the editor sent names no template (" + SCHEMA_IS_BASED_ON + "), so it is not "
+        + "an instance. The editor sends an empty object when it refused the template or instance it was "
+        + "handed, and the browser console says why.");
+  }
+
+  /** Whether {@code node} holds a string at {@code key} that is not blank. */
+  private static boolean statesText(ObjectNode node, String key)
+  {
+    JsonNode value = node.get(key);
+    return value != null && value.isTextual() && !value.asText().isBlank();
   }
 }

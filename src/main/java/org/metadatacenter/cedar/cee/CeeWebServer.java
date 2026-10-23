@@ -34,7 +34,7 @@ import java.util.concurrent.Executors;
  *   <li>{@code GET /s/{id}/data} — the session's mode, CEE config, template, and optional
  *       instance as one JSON object;</li>
  *   <li>{@code POST /s/{id}/submit} — the populated JSON-LD instance from the browser's Done
- *       button;</li>
+ *       button, answered with a 422 and the reason when what arrives names no template;</li>
  *   <li>{@code GET /health} — liveness probe.</li>
  * </ul>
  *
@@ -185,7 +185,15 @@ final class CeeWebServer
           ("submitted metadata is not a JSON object: " + e.getMessage()).getBytes(StandardCharsets.UTF_8));
       return;
     }
+    // A submission that is not an instance is still recorded, so a tool waiting on the session answers
+    // with the reason at once, and the page is told the same reason.
     session.submit(instance);
+    Optional<String> refusal = session.refusal(instance);
+    if (refusal.isPresent()) {
+      respond(exchange, 422, "text/plain; charset=utf-8",
+          ("No instance can be sent back to the chat. " + refusal.get()).getBytes(StandardCharsets.UTF_8));
+      return;
+    }
     respond(exchange, 204, null, new byte[0]);
   }
 

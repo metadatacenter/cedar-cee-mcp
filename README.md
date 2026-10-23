@@ -112,6 +112,11 @@ the non-blocking half of the fill story. If the user has not pressed Done yet, i
 than failing; if the user pressed Done more than once (say, to fix a mistake they spotted), the
 latest submission wins.
 
+An instance names the template it is based on, so a form opened from a template without an `id`,
+as one that has never been saved is, cannot return an instance. When the user presses Done,
+`fill_instance` and `collect_instance` answer with an error that says why, and the page shows the
+same reason. Save the template, then open the form with the saved one.
+
 *Show me the populated instance.*
 
 `show_instance` renders the instance read-only against its template — the full form with the
