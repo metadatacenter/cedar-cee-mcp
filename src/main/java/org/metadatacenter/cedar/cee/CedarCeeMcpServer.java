@@ -83,16 +83,13 @@ public final class CedarCeeMcpServer
     Map<String, Object> properties = new LinkedHashMap<>();
     properties.put("message", Map.of("type", "string", "description", "Arbitrary string to echo back."));
 
-    McpSchema.JsonSchema schema = new McpSchema.JsonSchema(
-        "object", properties, List.of("message"), Boolean.FALSE, null, null);
+    Map<String, Object> schema = ToolSchemas.object(properties, List.of("message"));
 
-    return McpSchema.Tool.builder()
-        .name("ping")
+    return McpSchema.Tool.builder("ping", schema)
         .title("ping")
         .description("Echoes the supplied message, with the server name and version appended. "
             + "Verifies the MCP server is reachable and reports which build is running. Does not "
             + "open a browser or start the web server.")
-        .inputSchema(schema)
         .build();
   }
 
@@ -103,8 +100,8 @@ public final class CedarCeeMcpServer
     String message = raw == null ? "" : raw.toString();
 
     return McpSchema.CallToolResult.builder()
-        .content(List.of(new McpSchema.TextContent(null,
-            "pong: " + message + " (" + SERVER_NAME + " " + SERVER_VERSION + ")")))
+        .content(List.of(McpSchema.TextContent.builder(
+            "pong: " + message + " (" + SERVER_NAME + " " + SERVER_VERSION + ")").build()))
         .isError(false)
         .build();
   }

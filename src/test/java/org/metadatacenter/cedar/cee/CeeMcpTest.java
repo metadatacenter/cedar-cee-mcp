@@ -412,7 +412,7 @@ final class CeeMcpTest
   {
     for (CeeTools.RegisteredTool registered : tools.all())
       if (registered.tool().name().equals(toolName))
-        return registered.handler().apply(null, new McpSchema.CallToolRequest(toolName, args));
+        return registered.handler().apply(null, ToolCalls.request(toolName, args));
     throw new AssertionError("no tool " + toolName);
   }
 

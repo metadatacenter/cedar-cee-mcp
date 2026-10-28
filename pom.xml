@@ -26,7 +26,7 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <mcp-sdk.version>1.1.3</mcp-sdk.version>
+    <mcp-sdk.version>2.1.0</mcp-sdk.version>
     <!--
       The MCP SDK validates tool input schemas with json-schema-validator 3.x. cedar-artifact-library
       brings 1.5.9, which resolution prefers for being the nearer declaration, and which has none of
@@ -34,7 +34,7 @@
       NoClassDefFoundError: com/networknt/schema/dialect/Dialects. Declared here so the 3.x release
       the SDK needs wins.
     -->
-    <json-schema-validator.version>3.0.0</json-schema-validator.version>
+    <json-schema-validator.version>3.0.8</json-schema-validator.version>
 
     <!--
       The stable CEE web-component bundle this MCP serves. The build fetches the public npm package
@@ -44,11 +44,11 @@
       Both lines move together on a bump. The hash is the bundle's own, from the package's
       bundle-manifest.json, and the build refuses a bundle that does not match it.
     -->
-    <cee.version>2.0.25</cee.version>
-    <cee.sha256>0821ebe422cfde9db3c07a96c7e1a80e9edcaafb0774ec4d38b57e9f95f2bc8d</cee.sha256>
+    <cee.version>2.0.30</cee.version>
+    <cee.sha256>87ec2da47f8efa70bd7d8b7fa8d05a8126ac807a21f878fd098607b0284ce3d6</cee.sha256>
     <cee.registry>https://registry.npmjs.org</cee.registry>
     <cee.package>cedar-embeddable-editor</cee.package>
-    <cedar-artifact-library.version>2.9.28</cedar-artifact-library.version>
+    <cedar-artifact-library.version>2.9.30</cedar-artifact-library.version>
     <!--
       Matched to what cedar-artifact-library brings, so this server parses session payloads with
       the databind its own dependency was built against. jackson-annotations is deliberately not
@@ -56,9 +56,9 @@
       SDK's Jackson 3 needs JsonFormat.Shape.POJO, added in 2.20. Letting annotations follow
       databind satisfies both, where a hand-picked version satisfies them only until one moves.
     -->
-    <jackson-databind.version>2.22.3</jackson-databind.version>
-    <junit.version>5.11.4</junit.version>
-    <slf4j.version>2.0.16</slf4j.version>
+    <jackson-databind.version>2.22.4</jackson-databind.version>
+    <junit.version>6.1.3</junit.version>
+    <slf4j.version>2.0.20</slf4j.version>
   </properties>
 
   <repositories>
@@ -141,12 +141,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>3.16.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.6.0</version>
       </plugin>
       <!--
         The end-to-end IT (*IT.java) spawns the shaded jar as a subprocess and exercises it from
@@ -158,7 +158,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <goals>
@@ -172,7 +172,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.2</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -220,7 +220,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>fetch-cee-bundle</id>

@@ -185,7 +185,7 @@ editing the config.
 
 ## Requirements
 
-- Java 17+, Maven 3.9+. The build pins released `cedar-artifact-library:2.9.28` and resolves it
+- Java 17+, Maven 3.9+. The build pins released `cedar-artifact-library:2.9.30` and resolves it
   and the other released CEDAR Java artifacts from the anonymous-read BMIR Nexus repository
   declared in `pom.xml`.
 - A browser. The CEE bundle is served locally, so the only network the form needs is CEDAR's
@@ -224,7 +224,7 @@ template and confirm the form renders read-only in the opened tab; then `fill_in
 value, press **Done**, and confirm the instance comes back. This end-to-end loop — bundle load,
 read-only rendering, editable rendering, a controlled term resolved against the terminology
 service, Done → submit → returned instance — has been verified against CEE
-`2.0.25`. Watch the browser console while you do: CEE reports a configuration
+`2.0.30`. Watch the browser console while you do: CEE reports a configuration
 key it does not read, and that is how a stale key is found.
 
 ## License

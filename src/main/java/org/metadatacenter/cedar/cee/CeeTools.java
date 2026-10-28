@@ -69,8 +69,9 @@ final class CeeTools
     properties.put("template", templateProperty());
     properties.put("language", languageProperty());
 
-    McpSchema.Tool tool = McpSchema.Tool.builder()
-        .name("show_template")
+    Map<String, Object> schema = ToolSchemas.object(properties, List.of("template"));
+
+    McpSchema.Tool tool = McpSchema.Tool.builder("show_template", schema)
         .title("Display a CEDAR template in the browser (read-only)")
         .description("Renders a CEDAR template as a read-only form in the user's browser via the "
             + "CEDAR Embeddable Editor, so a human can inspect its structure, fields, and "
@@ -78,7 +79,6 @@ final class CeeTools
             + "is also accepted. Returns the page URL; nothing is collected "
             + "back. Always show the user the URL in case the browser tab did not open "
             + "automatically.")
-        .inputSchema(schema(properties, List.of("template")))
         .build();
 
     return new RegisteredTool(tool, (exchange, request) -> {
@@ -106,8 +106,9 @@ final class CeeTools
             + "JSON-LD is also accepted."));
     properties.put("language", languageProperty());
 
-    McpSchema.Tool tool = McpSchema.Tool.builder()
-        .name("show_instance")
+    Map<String, Object> schema = ToolSchemas.object(properties, List.of("template", "instance"));
+
+    McpSchema.Tool tool = McpSchema.Tool.builder("show_instance", schema)
         .title("Display a populated CEDAR instance in the browser (read-only)")
         .description("Renders a CEDAR template instance against its template as a read-only form "
             + "in the user's browser via the CEDAR Embeddable Editor. Takes both artifacts as "
@@ -115,7 +116,6 @@ final class CeeTools
             + "structure shows, with unpopulated fields blank. Returns the page URL; nothing is "
             + "collected back. Always show the user the URL in case the browser tab did not open "
             + "automatically.")
-        .inputSchema(schema(properties, List.of("template", "instance")))
         .build();
 
     return new RegisteredTool(tool, (exchange, request) -> {
@@ -152,8 +152,9 @@ final class CeeTools
             + "indefinitely; collect the result later with collect_instance."));
     properties.put("language", languageProperty());
 
-    McpSchema.Tool tool = McpSchema.Tool.builder()
-        .name("fill_instance")
+    Map<String, Object> schema = ToolSchemas.object(properties, List.of("template"));
+
+    McpSchema.Tool tool = McpSchema.Tool.builder("fill_instance", schema)
         .title("Open an editable metadata form and wait for the user to fill it")
         .description("Opens an editable CEDAR metadata form in the user's browser via the CEDAR "
             + "Embeddable Editor — with ontology-backed autocomplete for controlled-term fields — "
@@ -164,7 +165,6 @@ final class CeeTools
             + "call collect_instance with that id once the user says they are done. Tell the "
             + "user a form has been opened and that they should press Done when finished. Takes "
             + "the template as YAML (compact read-only form accepted); CEDAR JSON is also accepted.")
-        .inputSchema(schema(properties, List.of("template")))
         .build();
 
     return new RegisteredTool(tool, (exchange, request) -> {
@@ -215,15 +215,15 @@ final class CeeTools
     properties.put("session_id", Map.of("type", "string", "description",
         "The session id returned by fill_instance."));
 
-    McpSchema.Tool tool = McpSchema.Tool.builder()
-        .name("collect_instance")
+    Map<String, Object> schema = ToolSchemas.object(properties, List.of("session_id"));
+
+    McpSchema.Tool tool = McpSchema.Tool.builder("collect_instance", schema)
         .title("Collect the instance the user submitted from an open form")
         .description("Fetches the populated instance from a fill_instance session after the fact "
             + "— the non-blocking half of the fill story. Returns the instance as JSON-LD, "
             + "exactly as the editor produced it, if the user has pressed Done, or a "
             + "not-yet-submitted notice otherwise. If the user pressed Done more than once, the "
             + "latest submission wins.")
-        .inputSchema(schema(properties, List.of("session_id")))
         .build();
 
     return new RegisteredTool(tool, (exchange, request) -> {
@@ -250,12 +250,12 @@ final class CeeTools
 
   private RegisteredTool listSessionsTool()
   {
-    McpSchema.Tool tool = McpSchema.Tool.builder()
-        .name("list_sessions")
+    Map<String, Object> schema = ToolSchemas.object(new LinkedHashMap<>(), List.of());
+
+    McpSchema.Tool tool = McpSchema.Tool.builder("list_sessions", schema)
         .title("List the CEE sessions this server is showing")
         .description("Lists the browser sessions this server has opened: id, mode, page URL, age, "
             + "and — for fill sessions — whether the user has submitted yet.")
-        .inputSchema(schema(new LinkedHashMap<>(), List.of()))
         .build();
 
     return new RegisteredTool(tool, (exchange, request) -> {
@@ -341,11 +341,6 @@ final class CeeTools
     return (language == null || language.isBlank()) ? "en" : language.trim();
   }
 
-  private static McpSchema.JsonSchema schema(Map<String, Object> properties, List<String> required)
-  {
-    return new McpSchema.JsonSchema("object", properties, required, Boolean.FALSE, null, null);
-  }
-
   private static Map<String, Object> args(McpSchema.CallToolRequest request)
   {
     return request.arguments() == null ? Map.of() : request.arguments();
@@ -383,7 +378,7 @@ final class CeeTools
   private static McpSchema.CallToolResult text(String message)
   {
     return McpSchema.CallToolResult.builder()
-        .content(List.of(new McpSchema.TextContent(null, message)))
+        .content(List.of(McpSchema.TextContent.builder(message).build()))
         .isError(false)
         .build();
   }
@@ -391,7 +386,7 @@ final class CeeTools
   private static McpSchema.CallToolResult error(String message)
   {
     return McpSchema.CallToolResult.builder()
-        .content(List.of(new McpSchema.TextContent(null, message)))
+        .content(List.of(McpSchema.TextContent.builder(message).build()))
         .isError(true)
         .build();
   }
