@@ -34,7 +34,7 @@
       NoClassDefFoundError: com/networknt/schema/dialect/Dialects. Declared here so the 3.x release
       the SDK needs wins.
     -->
-    <json-schema-validator.version>3.0.8</json-schema-validator.version>
+    <json-schema-validator.version>3.0.9</json-schema-validator.version>
 
     <!--
       The stable CEE web-component bundle this MCP serves. The build fetches the public npm package
@@ -48,7 +48,7 @@
     <cee.sha256>87ec2da47f8efa70bd7d8b7fa8d05a8126ac807a21f878fd098607b0284ce3d6</cee.sha256>
     <cee.registry>https://registry.npmjs.org</cee.registry>
     <cee.package>cedar-embeddable-editor</cee.package>
-    <cedar-artifact-library.version>2.9.30</cedar-artifact-library.version>
+    <cedar-artifact-library.version>2.9.31</cedar-artifact-library.version>
     <!--
       Matched to what cedar-artifact-library brings, so this server parses session payloads with
       the databind its own dependency was built against. jackson-annotations is deliberately not
@@ -167,7 +167,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
       </plugin>
       <!--
         The end-to-end IT (*IT.java) spawns the shaded jar as a subprocess and exercises it from
@@ -179,7 +179,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
         <executions>
           <execution>
             <goals>
