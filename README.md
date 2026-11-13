@@ -204,6 +204,28 @@ mvn verify         # + the end-to-end IT: spawns the shaded jar, speaks real JSO
                    #   the subprocess gets a PATH containing only no-op open/xdg-open shims.
 ```
 
+The browser gate runs the packaged server in Chromium, Firefox and WebKit:
+
+```bash
+mvn verify
+cd browser
+npm ci
+npx playwright install chromium firefox webkit
+npm test
+```
+
+On Linux, install the browser system libraries once with
+`npx playwright install-deps chromium firefox webkit`. CI runs both Maven verification and this
+gate. `CEDAR_TEST_WORKERS` bounds browser parallelism. Defaults are twelve on local hosts with at
+least sixteen logical cores, up to four on smaller hosts, and two in CI.
+All workers share one JVM over real MCP JSON-RPC, with independent sessions and browser contexts.
+No desktop browser opens, and no CEDAR deployment or external credentials are needed. A jar older
+than its sources is refused. Results, server logs and failure traces are kept in `browser/reports/`.
+
+The three-engine checks cover read-only templates and instances, editing and exact JSON-LD
+collection, replacement submissions, retry after a refused submission, concurrent session
+isolation, and recovery from bundle/session-data loading failures. Every case runs without retries.
+
 ## Smoke test
 
 Protocol-level (no browser):
@@ -219,7 +241,7 @@ EOF
 
 You should see the capabilities, six tools, and `pong: hello`. `Ctrl-C` to exit.
 
-Browser-level (the part unit tests can't cover): call `show_template` from an MCP client with any
+For a manual check through your MCP client, call `show_template` with any
 template and confirm the form renders read-only in the opened tab; then `fill_instance`, type a
 value, press **Done**, and confirm the instance comes back. This end-to-end loop — bundle load,
 read-only rendering, editable rendering, a controlled term resolved against the terminology

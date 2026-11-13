@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   test:
-    name: Maven verify (Java 17)
+    name: Maven and browser verification (Java 17)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -46,3 +46,30 @@ jobs:
       # is what a dependency bump risks.
       - name: Run Maven verification
         run: mvn --batch-mode --no-transfer-progress verify
+
+      - name: Use Node 24 for the browser gate
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.22.1
+          cache: npm
+          cache-dependency-path: browser/package-lock.json
+
+      - name: Install browser tools and engines
+        working-directory: browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium firefox webkit
+
+      - name: Exercise the packaged session page in three browsers
+        working-directory: browser
+        env:
+          CEDAR_TEST_WORKERS: '2'
+        run: npm test
+
+      - name: Keep browser results and failure traces
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: session-browser-results
+          path: browser/reports
+          if-no-files-found: ignore
