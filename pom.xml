@@ -169,6 +169,27 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.6.1</version>
       </plugin>
+      <!-- Measures what the unit suites cover and writes target/site/jacoco. The stdio tests start the
+           packaged jar in a process of its own, which the agent does not reach. -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.16</version>
+        <executions>
+          <execution>
+            <id>coverage-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>coverage-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!--
         The end-to-end IT (*IT.java) spawns the shaded jar as a subprocess and exercises it from
         the outside: real JSON-RPC over stdio plus HTTP against its session web server. It runs in
