@@ -279,7 +279,12 @@
                 <get src="${cee.registry}/${cee.package}/-/${cee.package}-${cee.version}.tgz"
                      dest="${cee.tgz}" skipexisting="true" verbose="false"/>
                 <untar src="${cee.tgz}" dest="${project.build.directory}/cee" compression="gzip">
-                  <patternset><include name="package/cedar-embeddable-editor.js"/></patternset>
+                  <!-- The type declarations state the configuration keys the bundle reads, which
+                       CeeMcpTest holds the keys this server sends to. -->
+                  <patternset>
+                    <include name="package/cedar-embeddable-editor.js"/>
+                    <include name="package/cedar-embeddable-editor.d.ts"/>
+                  </patternset>
                   <mapper type="flatten"/>
                 </untar>
                 <copy file="${project.build.directory}/cee/cedar-embeddable-editor.js"

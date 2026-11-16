@@ -139,12 +139,34 @@ final class CeeMcpTest
     assertEquals(404, get(root + CeeWebServer.TOKENS_PATH + "../session.html").statusCode());
   }
 
-  /** The configuration surface the pinned CEE declares, from its {@code CeeConfig}. */
-  private static final List<String> CEE_CONFIG_KEYS = List.of(
-      "showTemplateDescription", "previewMode", "showFieldType", "suppressEmptyFieldErrors",
-      "readOnlyMode", "trustTemplateRichText", "showDownloadMenu", "showExpandCollapseAll",
-      "terminologyBaseUrl", "bridgeBaseUrl", "defaultLanguage", "fallbackLanguage",
-      "languageMapPathPrefix");
+  /**
+   * The configuration surface the pinned CEE declares: the keys of {@code CeeConfig} in the type
+   * declarations of the package the build fetched, so a CEE release that renames or drops a key
+   * fails here rather than in a form that quietly loses a feature.
+   */
+  private static final List<String> CEE_CONFIG_KEYS = declaredConfigKeys();
+
+  private static List<String> declaredConfigKeys()
+  {
+    java.nio.file.Path declarations = java.nio.file.Path.of("target", "cee", "cedar-embeddable-editor.d.ts");
+    try {
+      String text = java.nio.file.Files.readString(declarations);
+      int start = text.indexOf("export interface CeeConfig {");
+      if (start < 0)
+        throw new IllegalStateException(declarations + " declares no CeeConfig");
+      int end = text.indexOf("\n}", start);
+      List<String> keys = new java.util.ArrayList<>();
+      java.util.regex.Matcher key = java.util.regex.Pattern.compile("(?m)^    ([A-Za-z][A-Za-z0-9]*)\\??:")
+          .matcher(text.substring(start, end));
+      while (key.find())
+        keys.add(key.group(1));
+      if (keys.isEmpty())
+        throw new IllegalStateException(declarations + " declares CeeConfig without keys");
+      return List.copyOf(keys);
+    } catch (java.io.IOException e) {
+      throw new java.io.UncheckedIOException("the build stages the pinned CEE's type declarations at " + declarations, e);
+    }
+  }
 
   @Test void fill_session_data_is_editable_and_carries_the_terminology_base_url() throws Exception
   {
