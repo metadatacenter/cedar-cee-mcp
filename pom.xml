@@ -48,7 +48,7 @@
     <cee.sha256>87ec2da47f8efa70bd7d8b7fa8d05a8126ac807a21f878fd098607b0284ce3d6</cee.sha256>
     <cee.registry>https://registry.npmjs.org</cee.registry>
     <cee.package>cedar-embeddable-editor</cee.package>
-    <cedar-artifact-library.version>2.9.31</cedar-artifact-library.version>
+    <cedar-artifact-library.version>2.9.36</cedar-artifact-library.version>
     <!--
       Matched to what cedar-artifact-library brings, so this server parses session payloads with
       the databind its own dependency was built against. jackson-annotations is deliberately not
