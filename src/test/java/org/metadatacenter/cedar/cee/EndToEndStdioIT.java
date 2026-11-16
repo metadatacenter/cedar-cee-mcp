@@ -119,6 +119,48 @@ final class EndToEndStdioIT
           "shipped tool descriptions must not advertise removed tool " + obsolete);
   }
 
+  /** The cedar-artifact-mcp tools this server's descriptions send a model to. */
+  private static final java.util.Set<String> SIBLING_TOOLS = java.util.Set.of("render_instance_artifact");
+
+  /** A word shaped like a tool name, such as show_template or render_instance_artifact. */
+  private static final java.util.regex.Pattern TOOL_NAME = java.util.regex.Pattern.compile(
+      "\\b(?:get|find|create|set|unset|add|remove|replace|reorder|validate|render|read|write|convert|show|fill"
+          + "|collect|list|update|delete)_[a-z_]+\\b");
+
+  /**
+   * A tool's description and its parameters' descriptions are the only documentation the calling
+   * model reads. Every listed tool must have one, every parameter must be described, every required
+   * parameter must be declared, and every tool a description names must exist, here or in the
+   * artifact server it sends instances to.
+   */
+  @Test @Order(1) void every_listed_tool_is_described_and_names_only_tools_that_exist() throws IOException
+  {
+    JsonNode tools = request("tools/list", Map.of()).at("/result/tools");
+    var names = new java.util.TreeSet<String>();
+    tools.forEach(tool -> names.add(tool.get("name").asText()));
+
+    var problems = new java.util.ArrayList<String>();
+    for (JsonNode tool : tools) {
+      String name = tool.path("name").asText();
+      if (tool.path("description").asText().isBlank())
+        problems.add(name + " has no description");
+      JsonNode properties = tool.path("inputSchema").path("properties");
+      properties.fieldNames().forEachRemaining(parameter -> {
+        if (properties.path(parameter).path("description").asText().isBlank())
+          problems.add(name + "." + parameter + " has no description");
+      });
+      tool.path("inputSchema").path("required").forEach(required -> {
+        if (!properties.has(required.asText()))
+          problems.add(name + " requires " + required.asText() + ", which it does not declare");
+      });
+      java.util.regex.Matcher named = TOOL_NAME.matcher(tool.toString());
+      while (named.find())
+        if (!names.contains(named.group()) && !SIBLING_TOOLS.contains(named.group()))
+          problems.add(name + " names " + named.group() + ", which is no tool");
+    }
+    assertEquals(java.util.List.of(), problems);
+  }
+
   @Test @Order(2) void ping_round_trips() throws IOException
   {
     assertTrue(toolText(call("ping", Map.of("message", "it"))).startsWith("pong: it ("),
